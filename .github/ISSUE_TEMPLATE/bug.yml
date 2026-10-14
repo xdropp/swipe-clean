@@ -1,41 +1,41 @@
-name: Relatar um problema
-description: Algo não funcionou como deveria
+name: Report a problem / Relatar um problema
+description: Something didn't work as expected
 labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: Obrigado por ajudar a melhorar o Swipe Clean! Quanto mais detalhes, mais rápido dá para corrigir.
+      value: Thanks for helping improve Swipe Clean! The more details, the faster it can be fixed. (Pode escrever em português.)
   - type: textarea
-    id: oque
+    id: what
     attributes:
-      label: O que aconteceu?
-      description: E o que você esperava que acontecesse.
+      label: What happened?
+      description: And what did you expect to happen?
     validations:
       required: true
   - type: textarea
-    id: passos
+    id: steps
     attributes:
-      label: Como reproduzir
+      label: How to reproduce
       placeholder: |
-        1. Abri o app
-        2. Cliquei em Analisar meu PC
+        1. Opened the app
+        2. Clicked Scan my PC
         3. ...
   - type: input
-    id: versao
+    id: version
     attributes:
-      label: Versão do Swipe Clean
-      description: Aparece em ⚙ Configurações, no rodapé.
-      placeholder: "1.2.0"
+      label: Swipe Clean version
+      description: Shown at the bottom of ⚙ Settings.
+      placeholder: "1.4.0"
     validations:
       required: true
   - type: input
     id: windows
     attributes:
-      label: Versão do Windows
+      label: Windows version
       placeholder: Windows 11 23H2
   - type: textarea
     id: log
     attributes:
       label: Log
-      description: Em ⚙ Configurações → Abrir pasta, abra o log.txt e cole o conteúdo aqui (ou arraste o arquivo). Ele não contém senhas, só nomes de programas e pastas.
+      description: In ⚙ Settings → Open folder, open log.txt and paste its contents here (or drag the file). It contains no passwords, only program and folder names.
       render: text

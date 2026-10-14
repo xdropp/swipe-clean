@@ -1,14 +1,14 @@
-name: Sugerir uma ideia
-description: Algo que deixaria o Swipe Clean melhor
-labels: [ideia]
+name: Suggest an idea / Sugerir uma ideia
+description: Something that would make Swipe Clean better
+labels: [idea]
 body:
   - type: textarea
-    id: ideia
+    id: idea
     attributes:
-      label: Qual é a ideia?
+      label: What's the idea?
     validations:
       required: true
   - type: textarea
-    id: porque
+    id: why
     attributes:
-      label: Que problema ela resolve para você?
+      label: What problem does it solve for you?

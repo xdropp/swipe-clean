@@ -13,36 +13,47 @@
     return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
   }
 
-  const galaxia = cover('GALÁXIA', '#1b1f5e', '#5a2a8a', '#000', `
+  // nomes fictícios nos dois idiomas
+  function makeDemoData(t, lang) {
+    const pt = lang === 'pt-BR';
+    const L = (a, b) => (pt ? a : b);
+    const galaxy = cover(L('GALÁXIA', 'LOST'), '#1b1f5e', '#5a2a8a', '#000', `
       <circle cx="300" cy="470" r="170" fill="#ffb347" opacity=".9"/><circle cx="300" cy="470" r="230" fill="none" stroke="#ffd59e" stroke-width="10" opacity=".5"/>
       <circle cx="120" cy="260" r="4" fill="#fff"/><circle cx="480" cy="330" r="3" fill="#fff"/><circle cx="420" cy="690" r="5" fill="#fff"/><circle cx="160" cy="640" r="3" fill="#fff"/>
-      <text x="300" y="215" text-anchor="middle" font-family="Segoe UI, Arial" font-weight="700" font-size="34" fill="#ffd59e" letter-spacing="10">PERDIDA</text>`);
-  const neon = cover('NEON RUSH', '#071a2e', '#0b5a6b', '#000', `
+      <text x="300" y="215" text-anchor="middle" font-family="Segoe UI, Arial" font-weight="700" font-size="34" fill="#ffd59e" letter-spacing="10">${L('PERDIDA', 'GALAXY')}</text>`);
+    const neon = cover('NEON RUSH', '#071a2e', '#0b5a6b', '#000', `
       <path d="M0 900 L300 420 L600 900 Z" fill="#0c2233"/><path d="M300 420 L300 900" stroke="#3ff" stroke-width="6"/>
       <path d="M150 900 L300 420 M450 900 L300 420" stroke="#f0f" stroke-width="4" opacity=".7"/>
       <rect x="240" y="640" width="120" height="60" rx="14" fill="#ff3d81"/><circle cx="300" cy="420" r="60" fill="#ffe04d" opacity=".85"/>`);
+    const cache = (key) => t('cache.' + key).split('|');
+    const [npmName, npmInfo] = cache('npm');
+    const U = 'C:\\Users\\' + L('Voce', 'You');
+    const MS = 'Microsoft Corporation';
 
-  window.DEMO_DATA = [
-    { id: 'p:sys1', kind: 'program', system: true, risky: true, name: 'Microsoft Visual C++ 2013 Redistributable (x64) - 12.0.40664', publisher: 'Microsoft Corporation', version: '12.0', installDate: '20230901', size: 20 * MB, lastUsed: null },
-    { id: 'p:sys2', kind: 'program', system: true, risky: true, name: 'Microsoft .NET Framework 4.6.1 SDK', publisher: 'Microsoft Corporation', version: '4.6.1', installDate: '20230901', size: 160 * MB, lastUsed: null },
-    { id: 'p:sys3', kind: 'program', system: true, risky: true, name: 'Microsoft Visual C++ 2013 x86 Minimum Runtime', publisher: 'Microsoft Corporation', version: '12.0', installDate: '20230901', size: 3 * MB, lastUsed: null },
-    { id: 'g:steam:1', kind: 'game', platform: 'steam', appid: '1', name: 'Galáxia Perdida', size: 92 * GB, lastUsed: now - 410 * DAY, updated: now - 20 * DAY, location: 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Galaxia', cover: galaxia, coverPortrait: true },
-    { id: 'g:steam:2', kind: 'game', platform: 'steam', appid: '2', name: 'Neon Rush', size: 48 * GB, lastUsed: now - 3 * DAY, updated: now - 2 * DAY, location: 'D:\\SteamLibrary\\steamapps\\common\\NeonRush', cover: neon, coverPortrait: true },
-    { id: 'g:steam:3', kind: 'game', platform: 'steam', appid: '3', name: 'Reino de Pedra: Edição Definitiva', size: 31 * GB, lastUsed: null, neverPlayed: true, updated: now - 200 * DAY, location: 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Reino' },
-    { id: 'g:epic:4', kind: 'game', platform: 'epic', name: 'Fortaleza Arena', size: 66 * GB, lastUsed: now - 95 * DAY, installed: now - 400 * DAY, location: 'C:\\Program Files\\Epic Games\\Fortaleza' },
-    { id: 'p:9', kind: 'program', isGame: true, name: 'Lendas do Abismo', publisher: 'Estúdio Fictício', version: '2.3', installDate: '20240310', size: 24 * GB, lastUsed: now - 160 * DAY, location: 'C:\\Games\\Abismo' },
-    { id: 'p:2', kind: 'program', name: 'Editor de Vídeo Pro 2024', publisher: 'Softwares Exemplo', version: '24.1', installDate: '20240203', location: 'C:\\Program Files\\EditorPro', size: 9.6 * GB, lastUsed: now - 95 * DAY },
-    { id: 'f:1', kind: 'download', name: 'Windows11_23H2_PTBR.iso', size: 6.2 * GB, modified: now - 300 * DAY, isDir: false, detail: 'Em Downloads', path: 'C:\\Users\\Voce\\Downloads\\Windows11_23H2_PTBR.iso' },
-    { id: 'p:3', kind: 'program', name: 'Android Studio', publisher: 'Google LLC', version: '2024.1', installDate: '20240520', location: 'C:\\Program Files\\Android', size: 3.1 * GB, lastUsed: now - 40 * DAY },
-    { id: 'f:2', kind: 'cache', name: 'Cache do npm', size: 4.4 * GB, detail: 'Pacotes baixados pelo npm. Eles são baixados de novo quando um projeto precisar.', path: 'C:\\Users\\Voce\\AppData\\Local\\npm-cache' },
-    { id: 'p:4', kind: 'program', system: true, name: 'Microsoft Visual C++ 2015-2022 Redistributable (x64)', publisher: 'Microsoft Corporation', version: '14.38', installDate: '20230901', size: 24 * MB, lastUsed: null, risky: true },
-    { id: 'f:3', kind: 'temp', name: 'Arquivos temporários', size: 2.3 * GB, detail: 'Sobras de instaladores e programas. Arquivos em uso agora são mantidos automaticamente.', path: 'C:\\Users\\Voce\\AppData\\Local\\Temp' },
-    { id: 's:1', kind: 'store', name: 'Paciência Clássica', publisher: 'Estúdio Exemplo', version: '4.19', installDate: '20230115', size: 380 * MB, lastUsed: null },
-    { id: 'p:5', kind: 'program', name: 'Chat Desktop', publisher: 'Exemplo Inc.', version: '1.0.9165', installDate: '20250412', location: 'C:\\Users\\Voce\\AppData\\Local\\Chat', size: 410 * MB, lastUsed: now - 1 * DAY },
-    { id: 'f:4', kind: 'appdata', name: 'Unity', size: 1.8 * GB, detail: 'Em Roaming\\Unity', matchedProgram: null, path: 'C:\\Users\\Voce\\AppData\\Roaming\\Unity' },
-    { id: 'p:6', kind: 'program', name: 'Compactador 6.24 (64-bit)', publisher: 'Exemplo GmbH', version: '6.24', installDate: '20221002', location: 'C:\\Program Files\\Compactador', size: 9 * MB, lastUsed: now - 500 * DAY },
-    { id: 'f:5', kind: 'user', name: 'Gravações de gameplay', size: 22 * GB, modified: now - 120 * DAY, isDir: true, detail: 'Em Videos', path: 'C:\\Users\\Voce\\Videos\\Gravações' },
-  ];
+    return [
+      { id: 'p:sys1', kind: 'program', system: true, risky: true, name: 'Microsoft Visual C++ 2013 Redistributable (x64) - 12.0.40664', publisher: MS, version: '12.0', installDate: '20230901', size: 20 * MB, lastUsed: null },
+      { id: 'p:sys2', kind: 'program', system: true, risky: true, name: 'Microsoft .NET Framework 4.6.1 SDK', publisher: MS, version: '4.6.1', installDate: '20230901', size: 160 * MB, lastUsed: null },
+      { id: 'p:sys3', kind: 'program', system: true, risky: true, name: 'Microsoft Visual C++ 2013 x86 Minimum Runtime', publisher: MS, version: '12.0', installDate: '20230901', size: 3 * MB, lastUsed: null },
+      { id: 'p:4', kind: 'program', system: true, risky: true, name: 'Microsoft Visual C++ 2015-2022 Redistributable (x64)', publisher: MS, version: '14.38', installDate: '20230901', size: 24 * MB, lastUsed: null },
+      { id: 'g:steam:1', kind: 'game', platform: 'steam', appid: '1', name: L('Galáxia Perdida', 'Lost Galaxy'), size: 92 * GB, lastUsed: now - 410 * DAY, updated: now - 20 * DAY, location: 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Galaxy', cover: galaxy, coverPortrait: true },
+      { id: 'g:steam:2', kind: 'game', platform: 'steam', appid: '2', name: 'Neon Rush', size: 48 * GB, lastUsed: now - 3 * DAY, updated: now - 2 * DAY, location: 'D:\\SteamLibrary\\steamapps\\common\\NeonRush', cover: neon, coverPortrait: true },
+      { id: 'g:steam:3', kind: 'game', platform: 'steam', appid: '3', name: L('Reino de Pedra: Edição Definitiva', 'Stone Kingdom: Definitive Edition'), size: 31 * GB, lastUsed: null, neverPlayed: true, updated: now - 200 * DAY, location: 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Kingdom' },
+      { id: 'g:epic:4', kind: 'game', platform: 'epic', name: L('Fortaleza Arena', 'Fortress Arena'), size: 66 * GB, lastUsed: now - 95 * DAY, installed: now - 400 * DAY, location: 'C:\\Program Files\\Epic Games\\Fortress' },
+      { id: 'p:9', kind: 'program', isGame: true, name: L('Lendas do Abismo', 'Legends of the Abyss'), publisher: L('Estúdio Fictício', 'Example Studio'), version: '2.3', installDate: '20240310', size: 24 * GB, lastUsed: now - 160 * DAY, location: 'C:\\Games\\Abyss' },
+      { id: 'p:2', kind: 'program', name: L('Editor de Vídeo Pro 2024', 'Video Editor Pro 2024'), publisher: L('Softwares Exemplo', 'Example Software'), version: '24.1', installDate: '20240203', location: 'C:\\Program Files\\VideoEditor', size: 9.6 * GB, lastUsed: now - 95 * DAY },
+      { id: 'f:1', kind: 'download', name: L('Windows11_23H2_PTBR.iso', 'Windows11_23H2_English.iso'), size: 6.2 * GB, modified: now - 300 * DAY, isDir: false, detail: t('item.inFolder', { folder: 'Downloads' }), path: U + '\\Downloads\\Windows11.iso' },
+      { id: 'p:3', kind: 'program', name: 'Android Studio', publisher: 'Google LLC', version: '2024.1', installDate: '20240520', location: 'C:\\Program Files\\Android', size: 3.1 * GB, lastUsed: now - 40 * DAY },
+      { id: 'f:2', kind: 'cache', name: npmName, size: 4.4 * GB, detail: npmInfo, path: U + '\\AppData\\Local\\npm-cache' },
+      { id: 'f:3', kind: 'temp', name: t('temp.name'), size: 2.3 * GB, detail: t('temp.detail'), path: U + '\\AppData\\Local\\Temp' },
+      { id: 's:1', kind: 'store', name: L('Paciência Clássica', 'Classic Solitaire'), publisher: L('Estúdio Exemplo', 'Example Studio'), version: '4.19', installDate: '20230115', size: 380 * MB, lastUsed: null },
+      { id: 'p:5', kind: 'program', name: 'Chat Desktop', publisher: L('Exemplo Inc.', 'Example Inc.'), version: '1.0.9165', installDate: '20250412', location: U + '\\AppData\\Local\\Chat', size: 410 * MB, lastUsed: now - 1 * DAY },
+      { id: 'f:4', kind: 'appdata', name: 'Unity', size: 1.8 * GB, detail: t('item.inFolder', { folder: 'Roaming\\Unity' }), matchedProgram: null, path: U + '\\AppData\\Roaming\\Unity' },
+      { id: 'p:6', kind: 'program', name: L('Compactador 6.24 (64-bit)', 'Archiver 6.24 (64-bit)'), publisher: L('Exemplo GmbH', 'Example GmbH'), version: '6.24', installDate: '20221002', location: 'C:\\Program Files\\Archiver', size: 9 * MB, lastUsed: now - 500 * DAY },
+      { id: 'f:5', kind: 'user', name: L('Gravações de gameplay', 'Gameplay recordings'), size: 22 * GB, modified: now - 120 * DAY, isDir: true, detail: t('item.inFolder', { folder: 'Videos' }), path: U + '\\Videos\\' + L('Gravacoes', 'Recordings') },
+    ];
+  }
+
+  window.makeDemoData = makeDemoData;
 })();
 
 // Doação fictícia, só para o modo demonstração (chave de exemplo, não recebe pagamentos).

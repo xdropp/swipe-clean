@@ -11,6 +11,7 @@ const crypto = require('crypto');
 const { Worker } = require('worker_threads');
 const { execFile, spawn } = require('child_process');
 const pix = require('./pix.js');
+const i18n = require('./i18n.js');
 
 const IS_WIN = process.platform === 'win32';
 const AUTO_SCAN = process.argv.includes('--auto-scan'); // usado pelo diagnostico.bat
@@ -52,7 +53,20 @@ process.on('unhandledRejection', (e) => writeLog('Promise rejeitada: ' + ((e && 
 
 // ---------------------------------------------------------------- configurações
 
-const DEFAULT_SETTINGS = { onlineCovers: true, showKept: false, showSystem: false };
+const DEFAULT_SETTINGS = { onlineCovers: true, showKept: false, showSystem: false, language: 'auto' };
+
+// idioma: "auto" segue o Windows (português → pt-BR, qualquer outro → inglês)
+let lang = 'en';
+let t = i18n.createT(lang);
+function applyLanguage() {
+  let pref = settings.language;
+  if (!pref || pref === 'auto') {
+    const sys = typeof app.getPreferredSystemLanguages === 'function' ? app.getPreferredSystemLanguages() : [];
+    pref = (sys && sys[0]) || app.getLocale();
+  }
+  lang = i18n.resolve(pref);
+  t = i18n.createT(lang);
+}
 let settings = { ...DEFAULT_SETTINGS };
 const userFile = (name) => path.join(app.getPath('userData'), name);
 
@@ -116,6 +130,8 @@ app.whenReady().then(() => {
     fs.writeFileSync(logPath, '');
   } catch {}
   loadSettings();
+  applyLanguage();
+  writeLog(`Idioma: ${lang} (configuração: ${settings.language})`);
   writeLog(
     `Swipe Clean ${app.getVersion()} iniciado. Electron ${process.versions.electron}, Windows ${os.release()}, pasta ${__dirname}, capas online: ${settings.onlineCovers}`
   );
@@ -162,7 +178,7 @@ function runWorker(data, onProgress) {
     });
     w.on('exit', (code) => {
       writeLog(`Thread encerrada (código ${code})`);
-      if (!settled) reject(new Error('A análise parou inesperadamente (código ' + code + ').'));
+      if (!settled) reject(new Error(t('scan.stopped', { code })));
     });
   });
 }
@@ -179,7 +195,7 @@ function runPS(args, timeoutMs = 300000) {
     child.stderr.on('data', (d) => (err += d));
     const timer = setTimeout(() => {
       child.kill();
-      reject(new Error('o PowerShell não respondeu a tempo'));
+      reject(new Error(t('remove.psTimeout')));
     }, timeoutMs);
     child.on('error', (e) => {
       clearTimeout(timer);
@@ -393,12 +409,16 @@ async function resolveCover(it) {
 
 ipcMain.on('log', (_e, text) => writeLog('Tela: ' + String(text).slice(0, 2000)));
 ipcMain.handle('disk-info', () => diskInfo());
-ipcMain.handle('app-info', async () => ({ version: app.getVersion(), admin: await isAdmin(), packaged: app.isPackaged }));
+ipcMain.handle('app-info', async () => ({ version: app.getVersion(), admin: await isAdmin(), packaged: app.isPackaged, lang }));
 ipcMain.handle('settings-get', () => settings);
 ipcMain.handle('settings-set', (_e, patch) => {
-  const allowed = Object.keys(DEFAULT_SETTINGS);
-  for (const k of Object.keys(patch || {})) if (allowed.includes(k)) settings[k] = !!patch[k];
+  for (const k of Object.keys(patch || {})) {
+    if (k === 'language') {
+      if (['auto', 'pt-BR', 'en'].includes(patch[k])) settings.language = patch[k];
+    } else if (k in DEFAULT_SETTINGS) settings[k] = !!patch[k];
+  }
   saveSettings();
+  applyLanguage();
   writeLog('Configurações: ' + JSON.stringify(settings));
   return settings;
 });
@@ -432,8 +452,8 @@ ipcMain.handle('relaunch-admin', async () => {
 });
 
 ipcMain.handle('scan', async () => {
-  if (!IS_WIN) throw new Error('O Swipe Clean só faz a análise real no Windows.');
-  if (scanning) throw new Error('Já existe uma análise em andamento.');
+  if (!IS_WIN) throw new Error(t('scan.onlyWindows'));
+  if (scanning) throw new Error(t('scan.already'));
   scanning = true;
   writeLog('Análise pedida pela tela');
   try {
@@ -441,6 +461,7 @@ ipcMain.handle('scan', async () => {
     const result = await runWorker(
       {
         task: 'scan',
+        lang,
         scriptsDir: unpacked('scripts'),
         home,
         local: process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'),
@@ -458,7 +479,7 @@ ipcMain.handle('scan', async () => {
     // capas dos jogos
     const gameItems = result.items.filter((i) => i.kind === 'game' || i.isGame);
     const prog = (status, text) => send('scan-progress', { type: 'progress', step: 'covers', status, text });
-    prog('active', `0 de ${gameItems.length}`);
+    prog('active', t('scan.progress', { done: 0, total: gameItems.length }));
     let done = 0;
     let found = 0;
     await pool(gameItems, 6, async (g) => {
@@ -468,15 +489,15 @@ ipcMain.handle('scan', async () => {
         found++;
       }
       done++;
-      prog('active', `${done} de ${gameItems.length}`);
+      prog('active', t('scan.progress', { done, total: gameItems.length }));
     });
-    prog('done', gameItems.length ? `${found} de ${gameItems.length} com capa` : 'Nenhum jogo encontrado');
+    prog('done', gameItems.length ? t('scan.coversDone', { found, total: gameItems.length }) : t('scan.noGames'));
     writeLog(`Capas: ${found} de ${gameItems.length}`);
 
     // ícones dos programas
     const programs = result.items.filter((i) => i.kind === 'program');
     const iconProg = (status, text) => send('scan-progress', { type: 'progress', step: 'icons', status, text });
-    iconProg('active', `0 de ${programs.length}`);
+    iconProg('active', t('scan.progress', { done: 0, total: programs.length }));
     done = 0;
     await pool(programs, 4, async (p) => {
       for (const c of p.iconCandidates || []) {
@@ -484,9 +505,9 @@ ipcMain.handle('scan', async () => {
         if (p.icon) break;
       }
       done++;
-      if (done % 4 === 0) iconProg('active', `${done} de ${programs.length}`);
+      if (done % 4 === 0) iconProg('active', t('scan.progress', { done, total: programs.length }));
     });
-    iconProg('done', `${programs.filter((p) => p.icon).length} carregados`);
+    iconProg('done', t('scan.iconsDone', { n: programs.filter((p) => p.icon).length }));
 
     writeLog(`Análise pronta: ${result.items.length} itens`);
     lastScan = new Map(result.items.map((i) => [i.id, i]));
@@ -538,29 +559,29 @@ async function waitUntilGone(it, isGone, { message, exitInfo }) {
     await sleep(1500);
     if (await isGone()) {
       const reboot = exitInfo && exitInfo.exit && (exitInfo.exit.code === 3010 || exitInfo.exit.code === 1641);
-      return { status: 'done', message: reboot ? 'Removido (reinicie o PC para concluir)' : 'Removido' };
+      return { status: 'done', message: reboot ? t('remove.doneReboot') : t('remove.done') };
     }
-    if (skipFlag) return { status: 'skipped', message: 'Pulado. Continua instalado.' };
+    if (skipFlag) return { status: 'skipped', message: t('remove.skipped') };
     if (exitInfo && exitInfo.exit) {
       const { code, error } = exitInfo.exit;
-      if (error) return { status: 'error', message: 'Não consegui abrir o desinstalador: ' + error };
-      if (code === 1602 || code === 1223) return { status: 'skipped', message: 'Você cancelou a desinstalação' };
+      if (error) return { status: 'error', message: t('remove.uninstallerFailed', { msg: error }) };
+      if (code === 1602 || code === 1223) return { status: 'skipped', message: t('remove.cancelled') };
       if (!warned && Date.now() - exitInfo.at > 20000) {
         warned = true;
         send('remove-progress', {
           id: it.id,
           status: 'waiting',
           canSkip: true,
-          message: 'O desinstalador fechou, mas ainda aparece como instalado. Se você cancelou, clique em Pular.',
+          message: t('remove.uninstallerClosed'),
         });
       }
     }
-    if (Date.now() > deadline) return { status: 'skipped', message: 'Tempo esgotado esperando a remoção' };
+    if (Date.now() > deadline) return { status: 'skipped', message: t('remove.timeout') };
   }
 }
 
 async function removeProgram(it) {
-  if (!(await regKeyExists(it.key))) return { status: 'done', message: 'Já não estava mais instalado' };
+  if (!(await regKeyExists(it.key))) return { status: 'done', message: t('remove.alreadyGone') };
   const exitInfo = { exit: null, at: 0 };
   startUninstall(it).then((r) => {
     exitInfo.exit = r;
@@ -568,20 +589,20 @@ async function removeProgram(it) {
   });
   return waitUntilGone(it, async () => !(await regKeyExists(it.key)), {
     exitInfo,
-    message: 'Desinstalador aberto. Siga as etapas na janela dele (pode aparecer um pedido de permissão do Windows).',
+    message: t('remove.uninstallerOpen'),
   });
 }
 
 async function removeSteamGame(it) {
-  if (!(await exists(it.manifestPath))) return { status: 'done', message: 'Já não estava mais instalado' };
+  if (!(await exists(it.manifestPath))) return { status: 'done', message: t('remove.alreadyGone') };
   await shell.openExternal(`steam://uninstall/${it.appid}`);
   return waitUntilGone(it, async () => !(await exists(it.manifestPath)), {
-    message: 'A Steam vai pedir confirmação. Clique em "Desinstalar" na janela da Steam.',
+    message: t('remove.steamConfirm'),
   });
 }
 
 async function removeEpicGame(it) {
-  if (!(await exists(it.manifestPath))) return { status: 'done', message: 'Já não estava mais instalado' };
+  if (!(await exists(it.manifestPath))) return { status: 'done', message: t('remove.alreadyGone') };
   const x86 = process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)';
   const launcher = [
     path.join(x86, 'Epic Games', 'Launcher', 'Portal', 'Binaries', 'Win64', 'EpicGamesLauncher.exe'),
@@ -597,23 +618,23 @@ async function removeEpicGame(it) {
   }
   if (!opened) await shell.openExternal('com.epicgames.launcher://store').catch(() => {});
   return waitUntilGone(it, async () => !(await exists(it.manifestPath)), {
-    message: `Na Epic Games, abra a Biblioteca, clique nos "⋯" de "${it.name}" e escolha Desinstalar.`,
+    message: t('remove.epicHint', { name: it.name }),
   });
 }
 
 async function removeStoreApp(it) {
-  if (!/^[A-Za-z0-9._~-]+$/.test(it.packageFullName)) return { status: 'error', message: 'Nome de pacote inválido' };
+  if (!/^[A-Za-z0-9._~-]+$/.test(it.packageFullName)) return { status: 'error', message: t('remove.invalidPackage') };
   await runPS(['-Command', `Remove-AppxPackage -Package '${it.packageFullName}' -ErrorAction Stop`]);
-  return { status: 'done', message: 'App removido' };
+  return { status: 'done', message: t('remove.storeDone') };
 }
 
 async function moveToTrash(it) {
-  if (!(await exists(it.path))) return { status: 'done', message: 'Já não existia' };
+  if (!(await exists(it.path))) return { status: 'done', message: t('remove.alreadyMissing') };
   try {
     await shell.trashItem(it.path);
-    return { status: 'done', message: 'Movido para a Lixeira', trashed: true };
+    return { status: 'done', message: t('remove.trashed'), trashed: true };
   } catch {
-    return { status: 'error', message: 'Não consegui mover para a Lixeira (talvez esteja em uso ou seja grande demais para ela).' };
+    return { status: 'error', message: t('remove.trashFailed') };
   }
 }
 
@@ -622,7 +643,7 @@ ipcMain.on('skip-current', () => {
 });
 
 ipcMain.handle('remove', async (_e, ids) => {
-  if (!IS_WIN) throw new Error('Remoção disponível só no Windows.');
+  if (!IS_WIN) throw new Error(t('remove.onlyWindows'));
   const before = await diskInfo();
   const results = [];
 
@@ -635,14 +656,14 @@ ipcMain.handle('remove', async (_e, ids) => {
 
   for (const it of items) {
     skipFlag = false;
-    send('remove-progress', { id: it.id, status: 'running', message: 'Removendo…' });
+    send('remove-progress', { id: it.id, status: 'running', message: t('remove.removing') });
     let r;
     try {
       if (it.kind === 'program') r = await removeProgram(it);
       else if (it.kind === 'game' && it.platform === 'steam') r = await removeSteamGame(it);
       else if (it.kind === 'game' && it.platform === 'epic') r = await removeEpicGame(it);
       else if (it.kind === 'store') r = await removeStoreApp(it);
-      else if (it.kind === 'temp' || it.kind === 'cache') r = await runWorker({ task: 'clean', path: it.path });
+      else if (it.kind === 'temp' || it.kind === 'cache') r = await runWorker({ task: 'clean', path: it.path, lang });
       else r = await moveToTrash(it);
     } catch (err) {
       r = { status: 'error', message: err.message };
@@ -677,7 +698,8 @@ function readDonation() {
   }
 }
 
-ipcMain.handle('donate-info', () => readDonation());
+// Pix só funciona no Brasil: a doação aparece apenas com o app em português
+ipcMain.handle('donate-info', () => (lang === 'pt-BR' ? readDonation() : { enabled: false }));
 ipcMain.handle('copy-text', (_e, text) => {
   clipboard.writeText(String(text).slice(0, 2000));
   return true;

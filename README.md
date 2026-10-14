@@ -1,90 +1,100 @@
 <div align="center">
 
-<img src="docs/img/icone.png" width="96" alt="Ícone do Swipe Clean" />
+<img src="docs/img/icone.png" width="96" alt="Swipe Clean icon" />
 
 # Swipe Clean
 
-**Libere espaço no seu PC deslizando cartas.**
-Jogos, aplicativos e pastas pesadas aparecem um de cada vez: deslize para a esquerda para remover, para a direita para manter.
+**Free up space on your PC by swiping cards.**
+Games, apps and heavy folders show up one at a time: swipe left to remove, right to keep.
 
-[![Baixar para Windows](https://img.shields.io/badge/Baixar_para_Windows-7c8cff?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/xdropp/swipe-clean/releases/latest)
+[![Download for Windows](https://img.shields.io/badge/Download_for_Windows-7c8cff?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/xdropp/swipe-clean/releases/latest)
 
-[![Versão](https://img.shields.io/github/v/release/xdropp/swipe-clean?label=vers%C3%A3o&color=2fe39a&cacheSeconds=3600)](https://github.com/xdropp/swipe-clean/releases/latest)
+[![Version](https://img.shields.io/github/v/release/xdropp/swipe-clean?label=version&color=2fe39a&cacheSeconds=3600)](https://github.com/xdropp/swipe-clean/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/xdropp/swipe-clean/total?label=downloads&color=7c8cff&cacheSeconds=3600)](https://github.com/xdropp/swipe-clean/releases)
-![Windows 10 e 11](https://img.shields.io/badge/Windows-10_e_11-0e1014)
-[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-0e1014)](LICENSE.txt)
+![Windows 10 and 11](https://img.shields.io/badge/Windows-10_and_11-0e1014)
+[![MIT License](https://img.shields.io/badge/license-MIT-0e1014)](LICENSE.txt)
 
-<img src="docs/img/jogo.png" width="760" alt="Carta de um jogo sendo deslizada para a esquerda" />
+**English** · [Português](README.pt-BR.md)
+
+<img src="docs/img/en/game.png" width="760" alt="A game card being swiped left" />
 
 </div>
 
-## Por que usar
+## Why Swipe Clean
 
-Ferramentas de limpeza costumam mostrar uma lista enorme e assustadora. O Swipe Clean faz o contrário: mostra **um item por vez, do maior para o menor**, com tudo o que você precisa para decidir. Tamanho, quando você usou pela última vez e o que acontece se remover.
+Cleanup tools usually throw a huge, scary list at you. Swipe Clean does the opposite: it shows **one item at a time, biggest first**, with everything you need to decide. How much space it takes, when you last used it, and what happens if you remove it.
 
-- 🎮 **Jogos** da Steam, da Epic Games e de outras lojas, com capa e data do último jogo.
-- 🧩 **Aplicativos** instalados e apps da Microsoft Store.
-- 📁 **Pastas grandes:** downloads esquecidos, caches, arquivos temporários e dados de programas que você já desinstalou.
+- 🎮 **Games** from Steam, Epic Games and other stores, with cover art and last-played date.
+- 🧩 **Apps** you installed, including Microsoft Store apps.
+- 📁 **Large folders**: forgotten downloads, caches, temporary files and leftovers from programs you already uninstalled.
 
-<img src="docs/img/resumo.png" width="760" alt="Resumo com as categorias Jogos, Aplicativos e Pastas grandes" />
+<img src="docs/img/en/summary.png" width="760" alt="Summary with the Games, Apps and Large folders categories" />
 
-## Seguro por padrão
+## Safe by default
 
-- **Deslizar só marca.** Nada é apagado antes de você revisar a lista e confirmar.
-- **Arquivos pessoais vão para a Lixeira**, então dá para recuperar.
-- **Programas e jogos saem pelo desinstalador oficial** deles, ou pela própria Steam ou Epic.
-- **Componentes do sistema ficam de fora.** Visual C++, .NET, DirectX, drivers e outras bibliotecas que jogos e programas precisam não viram cartas.
-- **Nada sai do seu PC.** Sem conta, sem anúncios, sem telemetria. Veja a [política de privacidade](PRIVACIDADE.md).
+- **Swiping only marks.** Nothing is deleted until you review the list and confirm.
+- **Personal files go to the Recycle Bin**, so you can restore them.
+- **Programs and games use their official uninstaller**, or Steam and Epic themselves.
+- **System components stay out of the way.** Visual C++, .NET, DirectX, drivers and other libraries that games and programs need never become cards.
+- **Nothing leaves your PC.** No account, no ads, no telemetry. See the [privacy policy](PRIVACY.md).
 
-<img src="docs/img/revisao.png" width="760" alt="Revisão das remoções antes de confirmar" />
+<img src="docs/img/en/review.png" width="760" alt="Reviewing removals before confirming" />
 
-## Como instalar
+## Install
 
-1. Vá em [**Releases**](https://github.com/xdropp/swipe-clean/releases/latest) e baixe um dos arquivos:
-   - **`SwipeClean-Setup-x.y.z.exe`** instala com atalhos no menu Iniciar (recomendado).
-   - **`SwipeClean-Portatil-x.y.z.exe`** abre direto, sem instalar.
-2. Abra o arquivo baixado. Não precisa instalar mais nada.
+1. Go to [**Releases**](https://github.com/xdropp/swipe-clean/releases/latest) and download one of the files:
+   - **`SwipeClean-Setup-x.y.z.exe`** installs with Start menu shortcuts (recommended).
+   - **`SwipeClean-Portable-x.y.z.exe`** runs directly, no installation.
+2. Open the downloaded file. Nothing else to install.
 
-> **"O Windows protegeu o computador"?** Esse aviso aparece para programas novos que ainda não têm assinatura digital. Clique em **Mais informações → Executar assim mesmo**. O código do Swipe Clean é aberto e você pode conferir tudo o que ele faz aqui no repositório.
+The app follows your Windows language (English or Portuguese). You can change it in **⚙ Settings → Language**.
 
-## Perguntas frequentes
+> **"Windows protected your PC"?** This warning shows up for new programs that don't have a digital signature yet. Click **More info → Run anyway**. Swipe Clean is open source, so you can check everything it does right here in this repository.
+
+## FAQ
 
 <details>
-<summary><b>Ele apaga coisas sozinho?</b></summary>
+<summary><b>Does it delete things on its own?</b></summary>
 
-Não. Deslizar para a esquerda só coloca o item numa fila. No final você vê a lista completa, pode desmarcar o que quiser e precisa confirmar. Mesmo depois disso, arquivos pessoais vão para a Lixeira.
+No. Swiping left only adds an item to a queue. At the end you see the full list, can uncheck anything and must confirm. Even then, personal files go to the Recycle Bin.
 </details>
 
 <details>
-<summary><b>Por que alguns aplicativos mostram "Abra como admin" no último uso?</b></summary>
+<summary><b>Why do some apps say "Run as admin" for last used?</b></summary>
 
-O Windows só deixa ver quando cada programa foi aberto com permissão de administrador. Use **⚙ Configurações → Reiniciar como administrador**. Jogos da Steam mostram a data do último jogo mesmo sem isso.
+Windows only reveals when each program was last opened to apps with administrator rights. Use **⚙ Settings → Restart as admin**. Steam games show the last-played date either way.
 </details>
 
 <details>
-<summary><b>De onde vêm as capas dos jogos?</b></summary>
+<summary><b>Where do the game covers come from?</b></summary>
 
-Primeiro das imagens que a Steam já guarda no seu PC. Quando não há, o nome do jogo é pesquisado na loja da Steam ou da Epic. Dá para desligar isso em **⚙ Configurações**.
+First from the images Steam already keeps on your PC. When there are none, the game's name is searched in the Steam or Epic store. You can turn this off in **⚙ Settings**.
 </details>
 
 <details>
-<summary><b>Removi algo por engano. E agora?</b></summary>
+<summary><b>Where are Visual C++, .NET and my drivers?</b></summary>
 
-Arquivos e pastas estão na **Lixeira**: é só restaurar de lá. Programas e jogos podem ser instalados de novo pela loja ou pelo site de origem; seus jogos continuam na sua biblioteca da Steam ou da Epic.
+They're hidden on purpose: games and programs depend on them, and removing them frees almost no space. If you really need to, turn on **⚙ Settings → Show system components**.
 </details>
 
 <details>
-<summary><b>Funciona em Mac ou Linux?</b></summary>
+<summary><b>I removed something by mistake. Now what?</b></summary>
 
-Por enquanto, só Windows 10 e 11.
+Files and folders are in the **Recycle Bin**, just restore them from there. Programs and games can be reinstalled from their store or website; your games stay in your Steam or Epic library.
 </details>
 
-## Problemas e sugestões
+<details>
+<summary><b>Does it work on Mac or Linux?</b></summary>
 
-Encontrou um erro ou tem uma ideia? [Abra uma issue](https://github.com/xdropp/swipe-clean/issues/new/choose). Para erros, anexe o `log.txt` (**⚙ Configurações → Abrir pasta**). Ele ajuda muito a descobrir o que aconteceu.
+Not yet, only Windows 10 and 11.
+</details>
 
-As novidades de cada versão estão no [CHANGELOG](CHANGELOG.md). Para rodar o código ou contribuir, veja o [guia de desenvolvimento](docs/DESENVOLVIMENTO.md).
+## Problems and ideas
 
-## Licença
+Found a bug or have an idea? [Open an issue](https://github.com/xdropp/swipe-clean/issues/new/choose). For bugs, please attach `log.txt` (**⚙ Settings → Open folder**). It really helps figure out what happened.
+
+What's new in each version is in the [CHANGELOG](CHANGELOG.md). To run the code or contribute, see the [development guide](docs/DEVELOPMENT.md).
+
+## License
 
 [MIT](LICENSE.txt) © 2026 Gabriel Froes

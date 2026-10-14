@@ -14,6 +14,26 @@ window.addEventListener('unhandledrejection', (e) => logToFile('Promise rejeitad
 const DEMO = !api || api.platform !== 'win32';
 const $ = (s) => document.querySelector(s);
 
+// ---------------------------------------------------------------- idioma
+const I18N = window.SwipeI18n;
+const demoLang = () => new URLSearchParams(location.search).get('lang') || navigator.language;
+let lang = I18N.resolve(demoLang());
+let t = I18N.createT(lang);
+let loc = I18N.locale(lang);
+let nf = new Intl.NumberFormat(loc, { maximumFractionDigits: 1 });
+
+function setLanguage(l) {
+  lang = l;
+  t = I18N.createT(lang);
+  loc = I18N.locale(lang);
+  nf = new Intl.NumberFormat(loc, { maximumFractionDigits: 1 });
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach((el) => (el.textContent = t(el.dataset.i18n)));
+  document.querySelectorAll('[data-i18n-html]').forEach((el) => (el.innerHTML = t(el.dataset.i18nHtml)));
+  document.querySelectorAll('[data-i18n-title]').forEach((el) => (el.title = t(el.dataset.i18nTitle)));
+}
+setLanguage(lang);
+
 const state = {
   items: [],
   decided: new Map(), // id -> 'keep' | 'remove'
@@ -33,7 +53,6 @@ const state = {
 
 // ---------------------------------------------------------------- formatação
 
-const nf = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
 function fmtBytes(b) {
   if (!b) return { n: '?', u: '' };
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -46,25 +65,24 @@ function fmtBytes(b) {
 }
 const bytes = (b) => {
   const f = fmtBytes(b);
-  return f.u ? `${f.n} ${f.u}` : 'tamanho desconhecido';
+  return f.u ? `${f.n} ${f.u}` : t('size.unknown');
 };
-const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+const items = (n) => t('n.items', { n });
 
 function fmtInstallDate(s) {
   if (!s || !/^\d{8}$/.test(s)) return null;
-  return `${s.slice(6, 8)}/${s.slice(4, 6)}/${s.slice(0, 4)}`;
+  return new Date(+s.slice(0, 4), +s.slice(4, 6) - 1, +s.slice(6, 8)).toLocaleDateString(loc);
 }
-const fmtDate = (ms) => (ms ? new Date(ms).toLocaleDateString('pt-BR') : null);
+const fmtDate = (ms) => (ms ? new Date(ms).toLocaleDateString(loc) : null);
 function ago(ms) {
   if (!ms) return null;
   const d = Math.floor((Date.now() - ms) / 86400000);
-  if (d <= 0) return 'hoje';
-  if (d === 1) return 'ontem';
-  if (d < 30) return `há ${d} dias`;
+  if (d <= 0) return t('ago.today');
+  if (d === 1) return t('ago.yesterday');
+  if (d < 30) return t('ago.days', { n: d });
   const m = Math.floor(d / 30);
-  if (m < 12) return `há ${m} ${m === 1 ? 'mês' : 'meses'}`;
-  const y = Math.floor(d / 365);
-  return `há ${y} ${y === 1 ? 'ano' : 'anos'}`;
+  if (m < 12) return t('ago.months', { n: m });
+  return t('ago.years', { n: Math.floor(d / 365) });
 }
 const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -77,35 +95,37 @@ const OLD = 90 * 86400000;
 
 // ---------------------------------------------------------------- categorias e tipos
 
-const CATS = {
-  games: { label: 'Jogos', emoji: '🎮', empty: 'Nenhum jogo encontrado.' },
-  apps: { label: 'Aplicativos', emoji: '🧩', empty: 'Nenhum aplicativo encontrado.' },
-  folders: { label: 'Pastas grandes', emoji: '📁', empty: 'Nenhuma pasta grande encontrada.' },
-};
+const CAT_EMOJI = { games: '🎮', apps: '🧩', folders: '📁' };
+const CATS = new Proxy(
+  {},
+  { get: (_o, c) => ({ label: t('cat.' + c), emoji: CAT_EMOJI[c], empty: t('cat.' + c + '.empty') }) }
+);
 const CAT_ORDER = ['games', 'apps', 'folders'];
 
 const catOf = (it) => (it.kind === 'game' || it.isGame ? 'games' : it.kind === 'program' || it.kind === 'store' ? 'apps' : 'folders');
 
-const PLATFORM = {
-  steam: { label: 'Steam', action: 'Abre a desinstalação na Steam' },
-  epic: { label: 'Epic Games', action: 'Abre a Epic para você desinstalar' },
-  pc: { label: 'PC', action: 'Abre o desinstalador oficial' },
-};
+const PLATFORM_LABEL = { steam: 'Steam', epic: 'Epic Games', pc: 'PC' };
+const PLATFORM_ACTION = { steam: 'action.steam', epic: 'action.epic', pc: 'action.uninstaller' };
+const PLATFORM = new Proxy({}, { get: (_o, p) => ({ label: PLATFORM_LABEL[p], action: t(PLATFORM_ACTION[p]) }) });
 const platformOf = (it) => (it.kind === 'game' ? it.platform : 'pc');
 
-const KIND = {
-  game: { label: 'Jogo', emoji: '🎮' },
-  program: { label: 'Programa', emoji: '🧩', action: 'Abre o desinstalador oficial' },
-  store: { label: 'App da Microsoft Store', emoji: '🛍️', action: 'Desinstala o app da Store' },
-  temp: { label: 'Arquivos temporários', emoji: '🧹', action: 'Apaga o conteúdo (é recriado quando preciso)' },
-  cache: { label: 'Cache', emoji: '♻️', action: 'Apaga o conteúdo (é recriado quando preciso)' },
-  download: { label: 'Downloads', emoji: '⬇️', action: 'Move para a Lixeira' },
-  user: { label: 'Arquivo pessoal', emoji: '🗂️', action: 'Move para a Lixeira' },
-  appdata: { label: 'Dados de aplicativo', emoji: '🗃️', action: 'Move para a Lixeira' },
+const KIND_DEF = {
+  game: ['🎮', null],
+  program: ['🧩', 'action.uninstaller'],
+  store: ['🛍️', 'action.store'],
+  temp: ['🧹', 'action.wipe'],
+  cache: ['♻️', 'action.wipe'],
+  download: ['⬇️', 'action.trash'],
+  user: ['🗂️', 'action.trash'],
+  appdata: ['🗃️', 'action.trash'],
 };
+const KIND = new Proxy(
+  {},
+  { get: (_o, k) => ({ label: t('kind.' + k), emoji: KIND_DEF[k][0], action: KIND_DEF[k][1] ? t(KIND_DEF[k][1]) : '' }) }
+);
 const actionOf = (it) => (catOf(it) === 'games' ? PLATFORM[platformOf(it)].action : KIND[it.kind].action);
 const kindLabel = (it) =>
-  catOf(it) === 'games' ? (it.kind === 'game' ? `Jogo · ${PLATFORM[it.platform].label}` : 'Jogo') : KIND[it.kind].label;
+  catOf(it) === 'games' ? (it.kind === 'game' ? t('kind.gameOn', { platform: PLATFORM[it.platform].label }) : t('kind.game')) : KIND[it.kind].label;
 
 const iconHTML = (it) => {
   if (it.cover) return `<img class="thumb-cover" src="${it.cover}" alt="" />`;
@@ -154,14 +174,14 @@ function updateTop() {
   const pendingSys = queue.filter(onSystemDrive).reduce((a, b) => a + (b.size || 0), 0);
   if (d && d.total) {
     const used = d.total - d.free;
-    $('#diskLabel').textContent = `Disco ${d.root.replace(/\\$/, '')}`;
-    $('#diskFree').textContent = `${bytes(d.free)} livres de ${bytes(d.total)}`;
+    $('#diskLabel').textContent = t('top.disk', { d: d.root.replace(/\\$/, '') });
+    $('#diskFree').textContent = t('top.free', { free: bytes(d.free), total: bytes(d.total) });
     $('#diskUsed').style.width = `${(Math.max(0, used - pendingSys) / d.total) * 100}%`;
     $('#diskPending').style.width = `${(Math.min(pendingSys, used) / d.total) * 100}%`;
   }
   const pill = $('#queuePill');
   pill.hidden = queue.length === 0;
-  pill.textContent = `🗑 ${plural(queue.length, 'item', 'itens')} · ${bytes(pendingBytes)} → Revisar`;
+  pill.textContent = t('top.pill', { items: items(queue.length), size: bytes(pendingBytes) });
 }
 
 // ---------------------------------------------------------------- resumo
@@ -176,15 +196,15 @@ function visible(it) {
 function renderSummary() {
   const total = state.items.filter(visible);
   const totalBytes = total.reduce((a, b) => a + (b.size || 0), 0);
-  $('#summaryTitle').textContent = `Encontrei ${plural(total.length, 'item', 'itens')}`;
+  $('#summaryTitle').textContent = t('summary.title', { n: total.length });
   const hiddenSystem = state.settings.showSystem ? 0 : state.items.filter((it) => it.system && !state.decided.has(it.id)).length;
   const hiddenKept = state.items.length - total.length - hiddenSystem;
   const notes = [];
-  if (hiddenSystem) notes.push(`${plural(hiddenSystem, 'componente do sistema oculto', 'componentes do sistema ocultos')} (Visual C++, .NET, drivers…)`);
-  if (hiddenKept > 0) notes.push(plural(hiddenKept, 'item que você já manteve oculto', 'itens que você já manteve ocultos'));
+  if (hiddenSystem) notes.push(t('summary.hiddenSystem', { n: hiddenSystem }));
+  if (hiddenKept > 0) notes.push(t('summary.hiddenKept', { n: hiddenKept }));
   $('#summarySub').innerHTML =
-    `${bytes(totalBytes)} no total. Escolha por onde começar.` +
-    (notes.length ? `<br/><span class="hidden-note">${esc(notes.join(' · '))} · <button class="link" id="hiddenSettings">ver nas Configurações</button></span>` : '');
+    esc(t('summary.sub', { size: bytes(totalBytes) })) +
+    (notes.length ? `<br/><span class="hidden-note">${esc(notes.join(' · '))} · <button class="link" id="hiddenSettings">${esc(t('summary.seeSettings'))}</button></span>` : '');
   const hs = $('#hiddenSettings');
   if (hs) hs.addEventListener('click', () => {
     renderSettings();
@@ -211,11 +231,11 @@ function renderSummary() {
         <div class="tile-title">${CATS[c].emoji} ${CATS[c].label}</div>
         <div class="tile-size">${all.length ? bytes(size) : '—'}</div>
         <div class="tile-count">${
-          all.length ? (done ? 'Tudo analisado ✓' : `${plural(left.length, 'carta', 'cartas')} para deslizar`) : CATS[c].empty
+          all.length ? (done ? t('tile.allDone') : t('tile.cardsLeft', { n: left.length })) : CATS[c].empty
         }</div>
         <ul class="tile-top">${top.map((it) => `<li><span>${esc(it.name)}</span><b>${bytes(it.size)}</b></li>`).join('')}</ul>
       </div>
-      <div class="tile-cta">${all.length ? (done ? 'Rever' : 'Começar →') : ''}</div>
+      <div class="tile-cta">${all.length ? (done ? t('tile.review') : t('tile.start')) : ''}</div>
     </button>`;
   }).join('');
   $('#tiles')
@@ -263,28 +283,28 @@ function facts(it) {
   const c = catOf(it);
   if (c === 'games') {
     if (it.kind === 'game' && it.platform === 'steam') {
-      if (it.lastUsed) f.push(['Último jogo', ago(it.lastUsed), Date.now() - it.lastUsed > OLD]);
-      else f.push(['Último jogo', it.neverPlayed ? 'Nunca jogado' : 'Sem registro', !!it.neverPlayed]);
-      f.push(['Atualizado', fmtDate(it.updated) || '—']);
+      if (it.lastUsed) f.push([t('fact.lastPlayed'), ago(it.lastUsed), Date.now() - it.lastUsed > OLD]);
+      else f.push([t('fact.lastPlayed'), it.neverPlayed ? t('fact.neverPlayed') : t('fact.noRecord'), !!it.neverPlayed]);
+      f.push([t('fact.updated'), fmtDate(it.updated) || '—']);
     } else {
       const used = ago(it.lastUsed);
-      f.push(['Último jogo', used || (state.prefetchAvailable ? 'Sem registro' : 'Abra como admin'), it.lastUsed && Date.now() - it.lastUsed > OLD]);
-      f.push(['Instalado', fmtInstallDate(it.installDate) || fmtDate(it.installed) || '—']);
+      f.push([t('fact.lastPlayed'), used || (state.prefetchAvailable ? t('fact.noRecord') : t('fact.openAsAdmin')), it.lastUsed && Date.now() - it.lastUsed > OLD]);
+      f.push([t('fact.installed'), fmtInstallDate(it.installDate) || fmtDate(it.installed) || '—']);
     }
-    f.push(['Plataforma', PLATFORM[platformOf(it)].label]);
-    f.push(['Pasta', shortPath(it.location)]);
+    f.push([t('fact.platform'), PLATFORM[platformOf(it)].label]);
+    f.push([t('fact.folder'), shortPath(it.location)]);
   } else if (c === 'apps') {
-    f.push(['Instalado em', fmtInstallDate(it.installDate) || '—']);
+    f.push([t('fact.installedOn'), fmtInstallDate(it.installDate) || '—']);
     let used = ago(it.lastUsed);
-    if (!used) used = it.kind === 'store' ? 'Sem registro' : state.prefetchAvailable ? 'Sem registro' : 'Abra como admin';
-    f.push(['Último uso', used, it.lastUsed && Date.now() - it.lastUsed > OLD]);
-    f.push(['Versão', it.version || '—']);
-    f.push(['Editora', it.publisher || '—']);
+    if (!used) used = it.kind === 'store' ? t('fact.noRecord') : state.prefetchAvailable ? t('fact.noRecord') : t('fact.openAsAdmin');
+    f.push([t('fact.lastUsed'), used, it.lastUsed && Date.now() - it.lastUsed > OLD]);
+    f.push([t('fact.version'), it.version || '—']);
+    f.push([t('fact.publisher'), it.publisher || '—']);
   } else {
-    if (it.modified) f.push(['Modificado', ago(it.modified), Date.now() - it.modified > OLD]);
-    else if (it.kind === 'appdata') f.push(['Programa', it.matchedProgram || 'Nenhum instalado']);
-    else f.push(['Seguro apagar?', 'Sim, é recriado']);
-    f.push(['Onde', shortPath(it.path)]);
+    if (it.modified) f.push([t('fact.modified'), ago(it.modified), Date.now() - it.modified > OLD]);
+    else if (it.kind === 'appdata') f.push([t('fact.program'), it.matchedProgram || t('fact.noneInstalled')]);
+    else f.push([t('fact.safeToDelete'), t('fact.yesRecreated')]);
+    f.push([t('fact.where'), shortPath(it.path)]);
   }
   return f;
 }
@@ -292,15 +312,15 @@ function facts(it) {
 function notesOf(it) {
   let warn = '';
   let note = '';
-  if (it.kind === 'program' && it.risky) warn = 'Pode ser necessário para outros programas ou para o Windows. Na dúvida, mantenha.';
-  if (it.kind === 'store' && it.risky) warn = 'Componente da Microsoft usado por outros apps. Na dúvida, mantenha.';
+  if (it.kind === 'program' && it.risky) warn = t('note.riskyProgram');
+  if (it.kind === 'store' && it.risky) warn = t('note.riskyStore');
   if (it.kind === 'appdata') {
-    if (it.matchedProgram) warn = `“${it.matchedProgram}” ainda está instalado. Apagar estes dados pode zerar as configurações dele.`;
-    else note = 'Nenhum programa instalado com esse nome. Pode ser sobra de algo que você já desinstalou.';
+    if (it.matchedProgram) warn = t('note.appdataInstalled', { name: it.matchedProgram });
+    else note = t('note.appdataOrphan');
   }
   if ((it.kind === 'cache' || it.kind === 'temp') && it.detail) note = it.detail;
-  if (it.kind === 'store' && !it.size) note = 'O Windows não deixa medir o tamanho de apps da Store.';
-  if (it.kind === 'game' && it.platform === 'epic') note = 'A remoção é feita pela própria Epic Games, que vai abrir para você.';
+  if (it.kind === 'store' && !it.size) note = t('note.storeNoSize');
+  if (it.kind === 'game' && it.platform === 'epic') note = t('note.epic');
   return { warn, note };
 }
 
@@ -310,7 +330,7 @@ function sizeBlock(it) {
   return `<div class="size-block">
       <div class="size">${size.n}<small>${size.u}</small></div>
       <div class="size-bar"><div style="width:${ratio * 100}%"></div></div>
-      ${state.disk && it.size && onSystemDrive(it) ? `<div class="size-note">${nf.format((it.size / state.disk.total) * 100)}% do disco</div>` : ''}
+      ${state.disk && it.size && onSystemDrive(it) ? `<div class="size-note">${t('card.diskShare', { pct: nf.format((it.size / state.disk.total) * 100) })}</div>` : ''}
     </div>`;
 }
 
@@ -323,10 +343,10 @@ function factsHTML(it) {
 function cardHTML(it, cls) {
   const { warn, note } = notesOf(it);
   const canOpen = it.path || it.location;
-  const stamps = `<div class="tint"></div><div class="stamp keep">MANTER</div><div class="stamp remove">REMOVER</div>`;
+  const stamps = `<div class="tint"></div><div class="stamp keep">${t('card.keep')}</div><div class="stamp remove">${t('card.remove')}</div>`;
   const foot = `<div class="card-foot">
-      <span class="action-label">Se remover: ${esc(actionOf(it))}</span>
-      ${canOpen ? `<button class="link" data-open="${esc(it.id)}">Abrir local ↗</button>` : ''}
+      <span class="action-label">${esc(t('card.ifRemoved', { action: actionOf(it) }))}</span>
+      ${canOpen ? `<button class="link" data-open="${esc(it.id)}">${t('card.openLocation')}</button>` : ''}
     </div>`;
 
   if (catOf(it) === 'games') {
@@ -382,18 +402,18 @@ function renderDeck() {
 
   const allInCat = state.items.filter((it) => visible(it) && catOf(it) === state.cat).length;
   const done = allInCat - list.length;
-  $('#counter').textContent = list.length ? `${done + 1} de ${allInCat}` : '';
+  $('#counter').textContent = list.length ? t('deck.counter', { i: done + 1, n: allInCat }) : '';
   $('#deckEmpty').hidden = list.length > 0;
   if (!list.length) {
     const q = removeList();
-    $('#emptyTitle').textContent = allInCat ? `${CATS[state.cat].label}: tudo analisado` : CATS[state.cat].empty;
+    $('#emptyTitle').textContent = allInCat ? t('deck.catDone', { cat: CATS[state.cat].label }) : CATS[state.cat].empty;
     $('#emptyText').textContent = q.length
-      ? `Na fila para remover: ${plural(q.length, 'item', 'itens')} (${bytes(q.reduce((a, b) => a + (b.size || 0), 0))}).`
-      : 'Nada marcado para remover até agora.';
+      ? t('deck.queued', { items: items(q.length), size: bytes(q.reduce((a, b) => a + (b.size || 0), 0)) })
+      : t('deck.nothingQueued');
     const next = CAT_ORDER.find((c) => c !== state.cat && pending(c).length);
     $('#emptyActions').innerHTML =
-      (next ? `<button class="ghost" data-go="${next}">Ir para ${CATS[next].label} →</button>` : '') +
-      (q.length ? `<button class="primary" id="emptyReviewBtn">Revisar remoções</button>` : '');
+      (next ? `<button class="ghost" data-go="${next}">${esc(t('deck.goTo', { cat: CATS[next].label }))}</button>` : '') +
+      (q.length ? `<button class="primary" id="emptyReviewBtn">${esc(t('deck.reviewRemovals'))}</button>` : '');
     $('#emptyActions')
       .querySelectorAll('[data-go]')
       .forEach((b) => b.addEventListener('click', () => openDeck(b.dataset.go)));
@@ -509,24 +529,14 @@ function saveDecisions() {
 
 // ---------------------------------------------------------------- análise
 
-const STEPS = [
-  ['usage', 'Histórico de uso'],
-  ['programs', 'Programas instalados'],
-  ['store', 'Apps da Microsoft Store'],
-  ['games', 'Jogos (Steam, Epic e outros)'],
-  ['caches', 'Temporários e caches'],
-  ['personal', 'Downloads e pastas pessoais'],
-  ['appdata', 'Dados de aplicativos'],
-  ['covers', 'Capas dos jogos'],
-  ['icons', 'Ícones dos programas'],
-];
+const STEPS = ['usage', 'programs', 'store', 'games', 'caches', 'personal', 'appdata', 'covers', 'icons'];
 let scanTimer = null;
 let scanBusy = false;
 
 function resetSteps() {
   $('#steps').innerHTML = STEPS.map(
-    ([id, label]) =>
-      `<li class="pending" data-step="${id}"><span class="st-icon"></span><span class="st-label">${label}</span><span class="st-text"></span></li>`
+    (id) =>
+      `<li class="pending" data-step="${id}"><span class="st-icon"></span><span class="st-label">${esc(t('step.' + id))}</span><span class="st-text"></span></li>`
   ).join('');
   document.querySelectorAll('.scan-error').forEach((e) => e.remove());
   $('#scanBar').style.width = '3%';
@@ -562,15 +572,15 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function demoScan() {
   const plan = [
-    ['usage', '512 registros', ['C:\\Windows\\Prefetch']],
-    ['programs', '86 encontrados', ['C:\\Program Files\\Adobe']],
-    ['store', '14 encontrados', ['C:\\Program Files\\WindowsApps']],
-    ['games', '3 Steam · 1 Epic · 1 outros', ['C:\\Program Files (x86)\\Steam\\steamapps']],
-    ['caches', '3 com espaço para liberar', ['C:\\Users\\Voce\\AppData\\Local\\npm-cache\\_cacache']],
-    ['personal', '2 itens grandes', ['C:\\Users\\Voce\\Downloads']],
-    ['appdata', '1 pasta grande', ['C:\\Users\\Voce\\AppData\\Roaming\\Unity']],
-    ['covers', '4 de 5 com capa', []],
-    ['icons', '84 carregados', []],
+    ['usage', t('scan.records', { n: 512 }), ['C:\\Windows\\Prefetch']],
+    ['programs', t('scan.found', { n: 86 }), ['C:\\Program Files\\Adobe']],
+    ['store', t('scan.found', { n: 14 }), ['C:\\Program Files\\WindowsApps']],
+    ['games', t('scan.gamesDone', { steam: 3, epic: 1, other: 1 }), ['C:\\Program Files (x86)\\Steam\\steamapps']],
+    ['caches', t('scan.cachesDone', { n: 3 }), ['C:\\Users\\You\\AppData\\Local\\npm-cache\\_cacache']],
+    ['personal', t('scan.bigItems', { n: 2 }), ['C:\\Users\\You\\Downloads']],
+    ['appdata', t('scan.bigFolders', { n: 1 }), ['C:\\Users\\You\\AppData\\Roaming\\Unity']],
+    ['covers', t('scan.coversDone', { found: 4, total: 5 }), []],
+    ['icons', t('scan.iconsDone', { n: 84 }), []],
   ];
   for (const [id, done, details] of plan) {
     onScanProgress({ step: id, status: 'active', text: '' });
@@ -582,7 +592,7 @@ async function demoScan() {
     onScanProgress({ step: id, status: 'done', text: done });
   }
   await wait(200);
-  return { items: structuredClone(window.DEMO_DATA), prefetchAvailable: true };
+  return { items: window.makeDemoData(t, lang), prefetchAvailable: true };
 }
 
 async function startScan() {
@@ -593,7 +603,7 @@ async function startScan() {
   btns.forEach((b) => {
     b.disabled = true;
     b.dataset.label = b.textContent;
-    b.innerHTML = '<span class="spin-sm"></span>Preparando…';
+    b.innerHTML = '<span class="spin-sm"></span>' + esc(t('scan.preparing'));
   });
   resetSteps();
   show('scan');
@@ -622,7 +632,7 @@ async function startScan() {
     $('#scanDetail').textContent = '';
     $('#scanDetail').insertAdjacentHTML(
       'afterend',
-      `<div class="warn scan-error">Não foi possível terminar a análise: ${esc(msg)}<br/><button class="ghost" style="margin-top:10px">Voltar ao início</button></div>`
+      `<div class="warn scan-error">${esc(t('scan.failed', { msg }))}<br/><button class="ghost" style="margin-top:10px">${esc(t('scan.backHome'))}</button></div>`
     );
     document.querySelector('.scan-error button').onclick = () => {
       document.querySelector('.scan-error').remove();
@@ -647,14 +657,14 @@ function openReview() {
     const group = list.filter((it) => catOf(it) === c);
     if (!group.length) return '';
     const size = group.reduce((a, b) => a + (b.size || 0), 0);
-    return `<div class="group-head">${CATS[c].emoji} ${CATS[c].label}<span>${plural(group.length, 'item', 'itens')} · ${bytes(size)}</span></div>` +
+    return `<div class="group-head">${CATS[c].emoji} ${CATS[c].label}<span>${items(group.length)} · ${bytes(size)}</span></div>` +
       group
         .map((it) => {
           const act = actionOf(it);
           let sub = kindLabel(it) + ' · ' + act.charAt(0).toLowerCase() + act.slice(1);
           let warnCls = '';
           if (it.risky || it.matchedProgram) {
-            sub = '⚠ ' + (it.matchedProgram ? `“${it.matchedProgram}” ainda está instalado` : 'Pode ser necessário para outros programas');
+            sub = '⚠ ' + (it.matchedProgram ? t('review.stillInstalled', { name: it.matchedProgram }) : t('review.mayBeNeeded'));
             warnCls = 'warn-text';
           }
           return `<label class="item">
@@ -679,12 +689,12 @@ function selectedForRemoval() {
 function updateReviewTotal() {
   const sel = selectedForRemoval();
   const total = sel.reduce((a, b) => a + (b.size || 0), 0);
-  $('#reviewTotal').innerHTML = `<b>${bytes(total)}</b> em ${plural(sel.length, 'item', 'itens')}`;
+  $('#reviewTotal').innerHTML = t('review.total', { size: bytes(total), items: items(sel.length) });
   $('#confirmBtn').disabled = sel.length === 0;
-  $('#confirmBtn').textContent = sel.length ? `Remover ${plural(sel.length, 'item', 'itens')}` : 'Remover';
+  $('#confirmBtn').textContent = sel.length ? t('review.removeN', { n: sel.length }) : t('review.remove');
 }
 
-function askConfirm(text, { title = 'Confirmar remoção', ok = 'Sim, remover' } = {}) {
+function askConfirm(text, { title = t('confirm.title'), ok = t('confirm.ok') } = {}) {
   return new Promise((resolve) => {
     $('#modalTitle').textContent = title;
     $('#modalOk').textContent = ok;
@@ -711,26 +721,26 @@ async function confirmRemoval() {
   const store = n((i) => i.kind === 'store');
   const trash = n((i) => ['download', 'user', 'appdata'].includes(i.kind));
   const wipe = n((i) => ['cache', 'temp'].includes(i.kind));
-  if (steam) lines.push(`• ${plural(steam, 'jogo da Steam', 'jogos da Steam')}: a Steam vai pedir confirmação de cada um.`);
-  if (epic) lines.push(`• ${plural(epic, 'jogo da Epic', 'jogos da Epic')}: a Epic vai abrir para você desinstalar.`);
-  if (progs) lines.push(`• ${plural(progs, 'programa', 'programas')}: o desinstalador de cada um vai abrir, um de cada vez.`);
-  if (store) lines.push(`• ${plural(store, 'app da Store será desinstalado', 'apps da Store serão desinstalados')}.`);
-  if (trash) lines.push(`• ${plural(trash, 'arquivo/pasta vai', 'arquivos/pastas vão')} para a Lixeira (dá para recuperar).`);
-  if (wipe) lines.push(`• ${plural(wipe, 'cache/temporário será apagado', 'caches/temporários serão apagados')} de vez.`);
-  const ok = await askConfirm(lines.join('\n') + `\n\nTotal estimado: ${bytes(sel.reduce((a, b) => a + (b.size || 0), 0))}.`);
+  if (steam) lines.push(t('confirm.steam', { n: steam }));
+  if (epic) lines.push(t('confirm.epic', { n: epic }));
+  if (progs) lines.push(t('confirm.programs', { n: progs }));
+  if (store) lines.push(t('confirm.store', { n: store }));
+  if (trash) lines.push(t('confirm.trash', { n: trash }));
+  if (wipe) lines.push(t('confirm.wipe', { n: wipe }));
+  const ok = await askConfirm(lines.join('\n') + '\n\n' + t('confirm.total', { size: bytes(sel.reduce((a, b) => a + (b.size || 0), 0)) }));
   if (ok) runRemoval(sel);
 }
 
 // ---------------------------------------------------------------- remoção
 
-const STATUS_LABEL = { queued: 'Na fila', running: 'Removendo', waiting: 'Aguardando você', done: 'Concluído', error: 'Erro', skipped: 'Pulado' };
+
 
 function setRowStatus(d) {
   const row = document.querySelector(`#removeList .item[data-id="${CSS.escape(d.id)}"]`);
   if (!row) return;
   const st = row.querySelector('.status');
   st.className = 'status ' + d.status;
-  st.textContent = STATUS_LABEL[d.status] || d.status;
+  st.textContent = t('status.' + d.status);
   if (d.message) row.querySelector('.item-sub').textContent = d.message;
   row.classList.toggle('current', d.status === 'running' || d.status === 'waiting');
   if (d.status === 'running' || d.status === 'waiting') row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -740,8 +750,8 @@ function setRowStatus(d) {
 async function runRemoval(sel) {
   const order = { temp: 0, cache: 1, download: 2, user: 2, appdata: 3, store: 4, program: 5, game: 6 };
   sel = [...sel].sort((a, b) => order[a.kind] - order[b.kind]);
-  $('#removeTitle').textContent = 'Removendo…';
-  $('#removeSub').textContent = 'Não feche o app enquanto isso acontece.';
+  $('#removeTitle').textContent = t('remove.title');
+  $('#removeSub').textContent = t('remove.dontClose');
   $('#removeFoot').hidden = true;
   $('#donateStrip').hidden = true;
   $('#removeList').innerHTML = sel
@@ -749,7 +759,7 @@ async function runRemoval(sel) {
       (it) => `<div class="item" data-id="${esc(it.id)}">
         <div class="icon ${catOf(it) === 'games' ? 'has-cover' : ''}">${iconHTML(it)}</div>
         <div class="item-main"><div class="item-name">${esc(it.name)}</div><div class="item-sub">${bytes(it.size)}</div></div>
-        <span class="status queued">Na fila</span>
+        <span class="status queued">${t('status.queued')}</span>
       </div>`
     )
     .join('');
@@ -760,9 +770,9 @@ async function runRemoval(sel) {
   if (DEMO) {
     const results = [];
     for (const it of sel) {
-      setRowStatus({ id: it.id, status: 'running', message: 'Removendo…' });
+      setRowStatus({ id: it.id, status: 'running', message: t('remove.removing') });
       await wait(500);
-      const r = { id: it.id, status: 'done', message: 'Concluído (simulação)', trashed: ['download', 'user', 'appdata'].includes(it.kind) };
+      const r = { id: it.id, status: 'done', message: t('remove.simulated'), trashed: ['download', 'user', 'appdata'].includes(it.kind) };
       setRowStatus(r);
       results.push(r);
     }
@@ -776,20 +786,18 @@ async function runRemoval(sel) {
   $('#skipBtn').hidden = true;
   const ok = result.results.filter((r) => r.status === 'done').length;
   const trashedBytes = result.results.filter((r) => r.trashed).reduce((a, r) => a + (sel.find((i) => i.id === r.id)?.size || 0), 0);
-  $('#removeTitle').textContent = `Pronto! ${ok} de ${plural(sel.length, 'item removido', 'itens removidos')}`;
-  $('#removeSub').textContent = trashedBytes
-    ? `Para liberar mais ${bytes(trashedBytes)}, esvazie a Lixeira quando tiver certeza.`
-    : 'Jogos em outros discos liberam espaço lá, não no disco do sistema.';
+  $('#removeTitle').textContent = t('remove.result', { ok, n: sel.length });
+  $('#removeSub').textContent = trashedBytes ? t('remove.emptyTrash', { size: bytes(trashedBytes) }) : t('remove.otherDrives');
   const drive = state.disk ? state.disk.root.replace(/\\$/, '') : '';
   $('#removeTotal').innerHTML =
     result.freed >= 1024 * 1024
-      ? `<b>${bytes(result.freed)}</b> liberados no disco ${drive}`
+      ? t('remove.freed', { size: bytes(result.freed), drive })
       : trashedBytes
-        ? `<b>${bytes(trashedBytes)}</b> na Lixeira`
-        : `Nenhum espaço liberado no disco ${drive}`;
+        ? t('remove.inTrash', { size: bytes(trashedBytes) })
+        : t('remove.noneFreed', { drive });
   $('#removeFoot').hidden = false;
   $('#donateStrip').hidden = !(state.donate.enabled && ok > 0);
-  if (ok > 0) $('#donateStripTitle').textContent = result.freed > 0 ? `Você liberou ${bytes(result.freed)}! Gostou?` : 'Gostou do resultado?';
+  if (ok > 0) $('#donateStripTitle').textContent = result.freed > 0 ? t('donate.stripFreed', { size: bytes(result.freed) }) : t('donate.stripTitle');
 
   const doneIds = new Set(result.results.filter((r) => r.status === 'done').map((r) => r.id));
   state.items = state.items.filter((i) => !doneIds.has(i.id));
@@ -805,23 +813,24 @@ function renderSettings() {
   $('#optShowKept').checked = !!state.settings.showKept;
   $('#optShowSystem').checked = !!state.settings.showSystem;
   const nKept = Object.keys(state.kept).length;
-  $('#keptInfo').textContent = nKept
-    ? `${plural(nKept, 'item que você manteve não aparece', 'itens que você manteve não aparecem')} nas novas análises.`
-    : 'Nenhum item mantido ainda.';
+  $('#keptInfo').textContent = nKept ? t('settings.keptInfo', { n: nKept }) : t('settings.noKept');
+  $('#optLanguage').value = state.settings.language || 'auto';
   $('#clearKeptBtn').disabled = !nKept;
-  $('#adminInfo').textContent = DEMO
-    ? 'Indisponível no modo demonstração.'
-    : state.info.admin
-      ? 'Rodando como administrador ✓ (o último uso dos aplicativos aparece).'
-      : 'Sem permissão: o último uso dos aplicativos fica oculto. Jogos da Steam mostram mesmo assim.';
+  $('#adminInfo').textContent = DEMO ? t('settings.adminDemo') : state.info.admin ? t('settings.adminYes') : t('settings.adminNo');
   $('#adminBtn').hidden = DEMO || state.info.admin;
   $('#donateSetting').hidden = !state.donate.enabled;
-  $('#about').textContent = `Swipe Clean ${DEMO ? '(demonstração)' : 'v' + state.info.version} · seus dados ficam só no seu PC`;
+  $('#about').textContent = t('settings.about', { version: DEMO ? t('settings.demo') : 'v' + state.info.version });
 }
 
 async function setSetting(k, v) {
   state.settings[k] = v;
   if (!DEMO) state.settings = await api.setSettings({ [k]: v });
+  if (k === 'language') {
+    // recarrega a tela para todos os textos (inclusive os da análise) virem no novo idioma
+    if (DEMO) location.search = v === 'auto' ? '' : '?lang=' + v;
+    else location.reload();
+    return;
+  }
   if ((k === 'showKept' || k === 'showSystem') && state.items.length) {
     if (!$('#screen-summary').hidden) renderSummary();
     if (!$('#screen-deck').hidden) renderDeck();
@@ -831,10 +840,7 @@ async function setSetting(k, v) {
 
 async function relaunchAdmin() {
   if (DEMO) return;
-  const ok = await askConfirm('O Swipe Clean vai fechar e abrir de novo com permissão de administrador. O Windows vai pedir sua confirmação.', {
-    title: 'Reiniciar como administrador',
-    ok: 'Reiniciar',
-  });
+  const ok = await askConfirm(t('admin.confirm'), { title: t('admin.title'), ok: t('admin.ok') });
   if (ok) await api.relaunchAdmin();
 }
 
@@ -857,8 +863,9 @@ function openDonate(where) {
 function renderDonate() {
   const opts = state.donate.options;
   const money = (v) => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  const other = t('donate.other');
   $('#amounts').innerHTML = opts
-    .map((o, i) => `<button data-i="${i}" class="${i === state.donateIdx ? 'on' : ''}">${o.amount ? money(o.amount) : 'Outro valor'}</button>`)
+    .map((o, i) => `<button data-i="${i}" class="${i === state.donateIdx ? 'on' : ''}">${o.amount ? money(o.amount) : other}</button>`)
     .join('');
   $('#amounts')
     .querySelectorAll('button')
@@ -919,6 +926,7 @@ $('#settings').addEventListener('click', (e) => {
 $('#optCovers').addEventListener('change', (e) => setSetting('onlineCovers', e.target.checked));
 $('#optShowKept').addEventListener('change', (e) => setSetting('showKept', e.target.checked));
 $('#optShowSystem').addEventListener('change', (e) => setSetting('showSystem', e.target.checked));
+$('#optLanguage').addEventListener('change', (e) => setSetting('language', e.target.value));
 $('#clearKeptBtn').addEventListener('click', async () => {
   state.kept = {};
   if (!DEMO) await api.clearDecisions();
@@ -963,7 +971,9 @@ if (!DEMO) {
     $('#demoBanner').hidden = false;
     state.disk = { root: 'C:\\', total: 476 * 1024 ** 3, free: 38 * 1024 ** 3 };
     state.info = { version: 'demo', admin: false };
-    state.donate = window.DEMO_DONATE || { enabled: false };
+    state.donate = lang === 'pt-BR' && window.DEMO_DONATE ? window.DEMO_DONATE : { enabled: false };
+    const q = new URLSearchParams(location.search).get('lang');
+    state.settings.language = q || 'auto';
   } else {
     const [disk, decisions, settings, info, donate] = await Promise.all([
       api.diskInfo(),
@@ -979,6 +989,7 @@ if (!DEMO) {
     state.kept = (decisions && decisions.kept) || {};
     state.settings = settings || state.settings;
     state.info = info || state.info;
+    if (state.info.lang && state.info.lang !== lang) setLanguage(state.info.lang);
     $('#adminNote').hidden = state.info.admin;
   }
   updateTop();

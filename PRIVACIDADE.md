@@ -1,5 +1,7 @@
 # Política de privacidade — Swipe Clean
 
+[English](PRIVACY.md) · **Português**
+
 O Swipe Clean funciona inteiramente no seu computador. Não há conta, anúncios, telemetria nem servidor próprio.
 
 ## O que o app lê
@@ -22,7 +24,7 @@ As capas baixadas ficam guardadas no seu PC para não precisarem ser buscadas de
 
 ## Doações
 
-O botão de doação só mostra um QR Code e um código Pix gerados no próprio app. O pagamento é feito no aplicativo do seu banco; o Swipe Clean não recebe, vê nem guarda nenhum dado de pagamento.
+O botão de doação (só na versão em português) mostra apenas um QR Code e um código Pix gerados no próprio app. O pagamento é feito no aplicativo do seu banco; o Swipe Clean não recebe, vê nem guarda nenhum dado de pagamento.
 
 ## O que fica salvo no seu PC
 

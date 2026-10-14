@@ -90,7 +90,7 @@ jobs:
           $log = Get-Content CHANGELOG.md -Raw
           $m = [regex]::Match($log, "(?ms)^## \[$([regex]::Escape($version))\][^\n]*\n(.*?)(?=^## \[|\z)")
           $notes = if ($m.Success) { $m.Groups[1].Value.Trim() } else { "Swipe Clean $version" }
-          $notes += "`n`n---`n**Qual baixar?** ``SwipeClean-Setup`` instala com atalhos no menu Iniciar. ``SwipeClean-Portatil`` abre direto, sem instalar.`n`nNa primeira vez, o Windows pode mostrar ""O Windows protegeu o computador"": clique em **Mais informações → Executar assim mesmo**."
+          $notes += "`n`n---`n**Which one?** ``SwipeClean-Setup`` installs with Start menu shortcuts. ``SwipeClean-Portable`` runs directly, no installation. · **Qual baixar?** ``Setup`` instala com atalhos; ``Portable`` abre direto, sem instalar.`n`nIf Windows shows ""Windows protected your PC"", click **More info → Run anyway**. · Se aparecer ""O Windows protegeu o computador"", clique em **Mais informações → Executar assim mesmo**."
           Set-Content release-notes.md $notes -Encoding utf8NoBOM
 
       - name: Publicar no GitHub Releases
@@ -104,4 +104,4 @@ jobs:
           body_path: release-notes.md
           files: |
             dist/SwipeClean-Setup-*.exe
-            dist/SwipeClean-Portatil-*.exe
+            dist/SwipeClean-Portable-*.exe

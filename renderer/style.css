@@ -458,3 +458,9 @@ button:disabled.ghost { opacity: .45; cursor: default; }
 
 .hidden-note { font-size: 13px; color: var(--muted); }
 .hidden-note .link { font-size: 13px; padding: 0; }
+
+.select {
+  background: var(--card2); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
+  padding: 7px 10px; font: inherit; font-size: 13px; cursor: pointer; flex-shrink: 0;
+}
+.select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }

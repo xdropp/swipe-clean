@@ -9,9 +9,11 @@ const fsp = fs.promises;
 const { spawn } = require('child_process');
 const games = require('./games.js');
 const { isSystemComponent } = require('./system-filter.js');
+const i18n = require('./i18n.js');
 
 const MB = 1024 * 1024;
 const opts = workerData || {};
+const t = i18n.createT(opts.lang || 'en');
 
 const post = (msg) => parentPort.postMessage(msg);
 const step = (id, status, extra = {}) => post({ type: 'progress', step: id, status, ...extra });
@@ -46,7 +48,7 @@ function runPSFile(file, timeoutMs = 180000) {
     const timer = setTimeout(() => {
       log(`PowerShell ${file}: tempo esgotado após ${timeoutMs / 1000}s`);
       child.kill();
-      reject(new Error(`o PowerShell não respondeu em ${timeoutMs / 1000}s`));
+      reject(new Error(t('scan.psTimeout', { s: timeoutMs / 1000 })));
     }, timeoutMs);
     child.on('error', (e) => {
       clearTimeout(timer);
@@ -228,7 +230,7 @@ async function enrichProgram(p, prefetch) {
 }
 
 async function listPrograms(prefetch) {
-  step('programs', 'active', { text: 'Lendo o registro do Windows…' });
+  step('programs', 'active', { text: t('scan.readingRegistry') });
   // "Steam App 123" são os registros que a Steam cria para cada jogo: eles viram cartas de jogo
   const raw = parseJSON(await runPSFile('list-programs.ps1')).filter((p) => !isHidden(p) && !/\\Steam App \d+$/i.test(p.key));
   const seen = new Set();
@@ -242,15 +244,15 @@ async function listPrograms(prefetch) {
   const out = await pool(unique, 6, async (p) => {
     const r = await enrichProgram(p, prefetch);
     done++;
-    step('programs', 'active', { text: `${done} de ${unique.length} analisados` });
+    step('programs', 'active', { text: t('scan.analyzed', { done, total: unique.length }) });
     return r;
   });
-  step('programs', 'done', { text: `${out.length} encontrados` });
+  step('programs', 'done', { text: t('scan.found', { n: out.length }) });
   return out;
 }
 
 async function listStoreApps() {
-  step('store', 'active', { text: 'Consultando a Microsoft Store…' });
+  step('store', 'active', { text: t('scan.queryingStore') });
   const raw = parseJSON(await runPSFile('list-store-apps.ps1'));
   const out = await pool(raw, 6, async (a) => {
     const size = a.location ? await dirSize(a.location) : 0;
@@ -268,7 +270,7 @@ async function listStoreApps() {
       packageFullName: a.packageFullName,
     };
   });
-  step('store', 'done', { text: `${out.length} encontrados` });
+  step('store', 'done', { text: t('scan.found', { n: out.length }) });
   return out;
 }
 
@@ -279,32 +281,33 @@ function cacheList() {
   const PD = process.env.ProgramData || 'C:\\ProgramData';
   const chrome = path.join(L, 'Google', 'Chrome', 'User Data', 'Default');
   const edge = path.join(L, 'Microsoft', 'Edge', 'User Data', 'Default');
+  // [chave da tradução, pasta] — o nome e a descrição vêm de i18n.js ("Nome|Descrição")
   return [
-    ['Cache do npm', path.join(L, 'npm-cache'), 'Pacotes baixados pelo npm. Eles são baixados de novo quando um projeto precisar.'],
-    ['Cache do npm', path.join(R, 'npm-cache'), 'Pacotes baixados pelo npm.'],
-    ['Cache do pip', path.join(L, 'pip', 'Cache'), 'Pacotes Python baixados pelo pip.'],
-    ['Cache do Yarn', path.join(L, 'Yarn', 'Cache'), 'Pacotes baixados pelo Yarn.'],
-    ['Store do pnpm', path.join(L, 'pnpm', 'store'), 'Pacotes do pnpm. Projetos vão rebaixar o que precisarem.'],
-    ['Cache do Gradle', path.join(home, '.gradle', 'caches'), 'Dependências baixadas pelo Gradle (Android/Java).'],
-    ['Pacotes do NuGet', path.join(home, '.nuget', 'packages'), 'Pacotes .NET baixados. São recuperados no próximo build.'],
-    ['Registro do Cargo', path.join(home, '.cargo', 'registry'), 'Crates Rust baixados.'],
-    ['Cache de build do Go', path.join(L, 'go-build'), 'Compilações intermediárias do Go.'],
-    ['Cache do Chrome', path.join(chrome, 'Cache'), 'Páginas e imagens guardadas pelo Chrome. Feche o Chrome antes.'],
-    ['Code Cache do Chrome', path.join(chrome, 'Code Cache'), 'Scripts compilados de sites. Feche o Chrome antes.'],
-    ['Cache do Edge', path.join(edge, 'Cache'), 'Páginas e imagens guardadas pelo Edge. Feche o Edge antes.'],
-    ['Code Cache do Edge', path.join(edge, 'Code Cache'), 'Scripts compilados de sites. Feche o Edge antes.'],
-    ['Cache do Discord', path.join(R, 'discord', 'Cache'), 'Imagens e mídias guardadas pelo Discord.'],
-    ['Cache do Spotify', path.join(L, 'Spotify', 'Data'), 'Músicas em cache do Spotify (não apaga as baixadas para ouvir offline no app).'],
-    ['Cache do VS Code', path.join(R, 'Code', 'CachedData'), 'Arquivos internos de versões antigas do VS Code.'],
-    ['Cache do VS Code', path.join(R, 'Code', 'Cache'), 'Cache da interface do VS Code.'],
-    ['Cache do Cursor', path.join(R, 'Cursor', 'CachedData'), 'Arquivos internos de versões antigas do Cursor.'],
-    ['Cache do Cursor', path.join(R, 'Cursor', 'Cache'), 'Cache da interface do Cursor.'],
-    ['Cache de shaders do DirectX', path.join(L, 'D3DSCache'), 'Shaders de jogos. São recriados (o 1º carregamento pode demorar mais).'],
-    ['Cache de shaders NVIDIA', path.join(L, 'NVIDIA', 'DXCache'), 'Shaders compilados pela placa NVIDIA.'],
-    ['Cache de shaders NVIDIA (GL)', path.join(L, 'NVIDIA', 'GLCache'), 'Shaders OpenGL da NVIDIA.'],
-    ['Cache de shaders AMD', path.join(L, 'AMD', 'DxCache'), 'Shaders compilados pela placa AMD.'],
-    ['Despejos de falha', path.join(L, 'CrashDumps'), 'Arquivos gerados quando programas travaram.'],
-    ['Relatórios de erro do Windows', path.join(PD, 'Microsoft', 'Windows', 'WER', 'ReportArchive'), 'Relatórios antigos de erros já enviados.'],
+    ['npm', path.join(L, 'npm-cache')],
+    ['npm', path.join(R, 'npm-cache')],
+    ['pip', path.join(L, 'pip', 'Cache')],
+    ['yarn', path.join(L, 'Yarn', 'Cache')],
+    ['pnpm', path.join(L, 'pnpm', 'store')],
+    ['gradle', path.join(home, '.gradle', 'caches')],
+    ['nuget', path.join(home, '.nuget', 'packages')],
+    ['cargo', path.join(home, '.cargo', 'registry')],
+    ['go', path.join(L, 'go-build')],
+    ['chrome', path.join(chrome, 'Cache')],
+    ['chromeCode', path.join(chrome, 'Code Cache')],
+    ['edge', path.join(edge, 'Cache')],
+    ['edgeCode', path.join(edge, 'Code Cache')],
+    ['discord', path.join(R, 'discord', 'Cache')],
+    ['spotify', path.join(L, 'Spotify', 'Data')],
+    ['vscodeData', path.join(R, 'Code', 'CachedData')],
+    ['vscode', path.join(R, 'Code', 'Cache')],
+    ['cursorData', path.join(R, 'Cursor', 'CachedData')],
+    ['cursor', path.join(R, 'Cursor', 'Cache')],
+    ['d3d', path.join(L, 'D3DSCache')],
+    ['nvidiaDx', path.join(L, 'NVIDIA', 'DXCache')],
+    ['nvidiaGl', path.join(L, 'NVIDIA', 'GLCache')],
+    ['amdDx', path.join(L, 'AMD', 'DxCache')],
+    ['crashDumps', path.join(L, 'CrashDumps')],
+    ['wer', path.join(PD, 'Microsoft', 'Windows', 'WER', 'ReportArchive')],
   ];
 }
 
@@ -326,32 +329,33 @@ async function scanFolders(programs) {
   };
 
   // 1. temporários e caches
-  step('caches', 'active', { text: 'Medindo arquivos temporários…' });
+  step('caches', 'active', { text: t('scan.measuringTemp') });
   const tsize = await dirSize(opts.temp);
   if (tsize >= 50 * MB) {
     add({
       kind: 'temp',
-      name: 'Arquivos temporários',
+      name: t('temp.name'),
       path: opts.temp,
       size: tsize,
-      detail: 'Sobras de instaladores e programas. Arquivos em uso agora são mantidos automaticamente.',
+      detail: t('temp.detail'),
     });
   }
   const caches = cacheList();
   let checked = 0;
-  await pool(caches, 4, async ([name, p, info]) => {
+  await pool(caches, 4, async ([key, p]) => {
     if (await exists(p)) {
       const size = await dirSize(p);
+      const [name, info] = t('cache.' + key).split('|');
       if (size >= 100 * MB) add({ kind: 'cache', name, path: p, size, detail: info });
     }
     checked++;
-    step('caches', 'active', { text: `${checked} de ${caches.length} locais verificados` });
+    step('caches', 'active', { text: t('scan.placesChecked', { done: checked, total: caches.length }) });
   });
   const nCaches = out.length;
-  step('caches', 'done', { text: nCaches ? `${nCaches} com espaço para liberar` : 'Nada grande encontrado' });
+  step('caches', 'done', { text: nCaches ? t('scan.cachesDone', { n: nCaches }) : t('scan.nothingBig') });
 
   // 2. Downloads e pastas pessoais
-  step('personal', 'active', { text: 'Olhando Downloads…' });
+  step('personal', 'active', { text: t('scan.looking', { folder: 'Downloads' }) });
   const personal = [
     ['download', opts.downloads, 100 * MB],
     ['user', opts.desktop, 500 * MB],
@@ -361,7 +365,7 @@ async function scanFolders(programs) {
   const before = out.length;
   for (const [kind, base, min] of personal) {
     if (!base) continue;
-    step('personal', 'active', { text: `Olhando ${path.basename(base)}…` });
+    step('personal', 'active', { text: t('scan.looking', { folder: path.basename(base) }) });
     let entries = [];
     try {
       entries = await fsp.readdir(base, { withFileTypes: true });
@@ -377,14 +381,14 @@ async function scanFolders(programs) {
       try {
         modified = (await fsp.stat(p)).mtimeMs;
       } catch {}
-      add({ kind, name: e.name, path: p, size, modified, isDir: e.isDirectory(), detail: `Em ${path.basename(base)}` });
+      add({ kind, name: e.name, path: p, size, modified, isDir: e.isDirectory(), detail: t('item.inFolder', { folder: path.basename(base) }) });
     });
   }
   const nP = out.length - before;
-  step('personal', 'done', { text: nP ? `${nP} ${nP === 1 ? 'item grande' : 'itens grandes'}` : 'Nada grande encontrado' });
+  step('personal', 'done', { text: nP ? t('scan.bigItems', { n: nP }) : t('scan.nothingBig') });
 
   // 3. dados de aplicativos em AppData
-  step('appdata', 'active', { text: 'Listando pastas…' });
+  step('appdata', 'active', { text: t('scan.listingFolders') });
   const names = programs.map((p) => (p.name + ' ' + (p.publisher || '')).toLowerCase());
   const cachePaths = out.filter((o) => o.kind === 'cache').map((o) => [o.path.toLowerCase(), o.size]);
   const dirs = [];
@@ -400,7 +404,7 @@ async function scanFolders(programs) {
   await pool(dirs, 4, async (p) => {
     let size = await dirSize(p);
     measured++;
-    step('appdata', 'active', { text: `${measured} de ${dirs.length} pastas medidas` });
+    step('appdata', 'active', { text: t('scan.foldersMeasured', { done: measured, total: dirs.length }) });
     for (const [cp, cs] of cachePaths) if (cp.startsWith(p.toLowerCase() + path.sep)) size -= cs;
     if (size < 300 * MB) return;
     const name = path.basename(p);
@@ -411,13 +415,13 @@ async function scanFolders(programs) {
       name,
       path: p,
       size,
-      detail: `Em ${path.basename(path.dirname(p))}\\${name}`,
+      detail: t('item.inFolder', { folder: `${path.basename(path.dirname(p))}\\${name}` }),
       matchedProgram: match ? match.name : null,
       risky: !!match,
     });
   });
   const nA = out.length - before2;
-  step('appdata', 'done', { text: nA ? `${nA} ${nA === 1 ? 'pasta grande' : 'pastas grandes'}` : 'Nada grande encontrado' });
+  step('appdata', 'done', { text: nA ? t('scan.bigFolders', { n: nA }) : t('scan.nothingBig') });
 
   return out;
 }
@@ -425,16 +429,16 @@ async function scanFolders(programs) {
 // ---------------------------------------------------------------- tarefas
 
 async function scan() {
-  step('usage', 'active', { text: 'Lendo C:\\Windows\\Prefetch…' });
+  step('usage', 'active', { text: t('scan.readingPrefetch') });
   const prefetch = await readPrefetch();
   step('usage', 'done', {
-    text: prefetch.available ? `${prefetch.map.size} registros` : 'Sem permissão (abra como administrador)',
+    text: prefetch.available ? t('scan.records', { n: prefetch.map.size }) : t('scan.noAdmin'),
     warn: !prefetch.available,
   });
 
   const ctx = { prefetch, dirSize, findExes, log };
   const gamesPromise = (async () => {
-    step('games', 'active', { text: 'Procurando na Steam e na Epic…' });
+    step('games', 'active', { text: t('scan.searchingGames') });
     const [steam, epic] = await Promise.all([
       games.listSteamGames(ctx).catch((e) => (log('Steam falhou: ' + e.message), [])),
       games.listEpicGames(ctx).catch((e) => (log('Epic falhou: ' + e.message), [])),
@@ -444,11 +448,11 @@ async function scan() {
 
   const [programs, store] = await Promise.all([
     listPrograms(prefetch).catch((e) => {
-      step('programs', 'error', { text: 'Falhou: ' + e.message.slice(0, 120) });
+      step('programs', 'error', { text: t('scan.failedStep', { msg: e.message.slice(0, 120) }) });
       return [];
     }),
     listStoreApps().catch((e) => {
-      step('store', 'error', { text: 'Falhou: ' + e.message.slice(0, 120) });
+      step('store', 'error', { text: t('scan.failedStep', { msg: e.message.slice(0, 120) }) });
       return [];
     }),
   ]);
@@ -459,7 +463,7 @@ async function scan() {
   const apps = programs.filter((p) => !(p.location && launcherLocs.has(p.location.toLowerCase().replace(/\\+$/, ''))));
   const otherGames = apps.filter((p) => p.isGame).length;
   step('games', 'done', {
-    text: `${steam.length} Steam · ${epic.length} Epic · ${otherGames} outros`,
+    text: t('scan.gamesDone', { steam: steam.length, epic: epic.length, other: otherGames }),
   });
 
   const folders = await scanFolders(apps);
@@ -471,7 +475,7 @@ async function clean(dir) {
   try {
     entries = await fsp.readdir(dir);
   } catch {
-    return { status: 'done', message: 'A pasta já não existe' };
+    return { status: 'done', message: t('clean.missing') };
   }
   let kept = 0;
   await pool(entries, 8, async (name) => {
@@ -483,7 +487,7 @@ async function clean(dir) {
   });
   return {
     status: 'done',
-    message: kept ? `Limpo (${kept} ${kept === 1 ? 'item em uso foi mantido' : 'itens em uso foram mantidos'})` : 'Limpo',
+    message: kept ? t('clean.partial', { n: kept }) : t('clean.done'),
   };
 }
 

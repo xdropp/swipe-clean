@@ -1,8 +1,8 @@
 {
   "name": "swipe-clean",
   "productName": "Swipe Clean",
-  "version": "1.3.0",
-  "description": "Libere espaço no PC deslizando cartas: esquerda remove, direita mantém. Jogos, aplicativos e pastas grandes.",
+  "version": "1.4.0",
+  "description": "Free up space on your PC by swiping cards: left removes, right keeps. Games, apps and large folders.",
   "main": "main.js",
   "author": "Gabriel Froes",
   "license": "MIT",
@@ -38,6 +38,7 @@
       "scanner.js",
       "games.js",
       "system-filter.js",
+      "i18n.js",
       "pix.js",
       "doacao.json",
       "vendor/**",
@@ -49,7 +50,8 @@
       "scripts/**",
       "scanner.js",
       "games.js",
-      "system-filter.js"
+      "system-filter.js",
+      "i18n.js"
     ],
     "win": {
       "icon": "build/icon.ico",
@@ -67,15 +69,17 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Swipe Clean",
       "installerLanguages": [
+        "en_US",
         "pt_BR"
       ],
-      "language": "1046",
+      "language": "1033",
       "license": "LICENSE.txt",
       "artifactName": "SwipeClean-Setup-${version}.${ext}",
-      "uninstallDisplayName": "Swipe Clean"
+      "uninstallDisplayName": "Swipe Clean",
+      "displayLanguageSelector": false
     },
     "portable": {
-      "artifactName": "SwipeClean-Portatil-${version}.${ext}"
+      "artifactName": "SwipeClean-Portable-${version}.${ext}"
     }
   }
 }
