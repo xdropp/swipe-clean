@@ -33,7 +33,7 @@ Ferramentas de limpeza costumam mostrar uma lista enorme e assustadora. O Swipe 
 - **Deslizar só marca.** Nada é apagado antes de você revisar a lista e confirmar.
 - **Arquivos pessoais vão para a Lixeira**, então dá para recuperar.
 - **Programas e jogos saem pelo desinstalador oficial** deles, ou pela própria Steam ou Epic.
-- **Componentes do Windows nem aparecem.** Drivers e bibliotecas importantes vêm com aviso.
+- **Componentes do sistema ficam de fora.** Visual C++, .NET, DirectX, drivers e outras bibliotecas que jogos e programas precisam não viram cartas.
 - **Nada sai do seu PC.** Sem conta, sem anúncios, sem telemetria. Veja a [política de privacidade](PRIVACIDADE.md).
 
 <img src="docs/img/revisao.png" width="760" alt="Revisão das remoções antes de confirmar" />

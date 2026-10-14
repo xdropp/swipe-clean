@@ -455,3 +455,6 @@ button:disabled.ghost { opacity: .45; cursor: default; }
 .donate-foot { color: var(--muted); font-size: 12px; margin: 16px 0 0 !important; }
 
 .panel-foot button { white-space: nowrap; }
+
+.hidden-note { font-size: 13px; color: var(--muted); }
+.hidden-note .link { font-size: 13px; padding: 0; }

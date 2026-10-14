@@ -52,7 +52,7 @@ process.on('unhandledRejection', (e) => writeLog('Promise rejeitada: ' + ((e && 
 
 // ---------------------------------------------------------------- configurações
 
-const DEFAULT_SETTINGS = { onlineCovers: true, showKept: false };
+const DEFAULT_SETTINGS = { onlineCovers: true, showKept: false, showSystem: false };
 let settings = { ...DEFAULT_SETTINGS };
 const userFile = (name) => path.join(app.getPath('userData'), name);
 

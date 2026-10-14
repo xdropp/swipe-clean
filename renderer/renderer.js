@@ -21,7 +21,7 @@ const state = {
   front: null, // id que deve voltar ao topo (desfazer)
   cat: 'games',
   kept: {}, // decisões "manter" salvas entre sessões
-  settings: { onlineCovers: true, showKept: false },
+  settings: { onlineCovers: true, showKept: false, showSystem: false },
   info: { version: '', admin: false },
   donate: { enabled: false },
   donateIdx: 0,
@@ -169,6 +169,7 @@ function updateTop() {
 // o que foi mantido em análises anteriores some (a não ser que a configuração peça);
 // o que foi decidido nesta sessão continua contando
 function visible(it) {
+  if (it.system && !state.settings.showSystem && !state.decided.has(it.id)) return false;
   return state.settings.showKept || !state.kept[it.id] || state.decided.has(it.id);
 }
 
@@ -176,10 +177,19 @@ function renderSummary() {
   const total = state.items.filter(visible);
   const totalBytes = total.reduce((a, b) => a + (b.size || 0), 0);
   $('#summaryTitle').textContent = `Encontrei ${plural(total.length, 'item', 'itens')}`;
-  const hiddenKept = state.items.length - total.length;
-  $('#summarySub').textContent =
+  const hiddenSystem = state.settings.showSystem ? 0 : state.items.filter((it) => it.system && !state.decided.has(it.id)).length;
+  const hiddenKept = state.items.length - total.length - hiddenSystem;
+  const notes = [];
+  if (hiddenSystem) notes.push(`${plural(hiddenSystem, 'componente do sistema oculto', 'componentes do sistema ocultos')} (Visual C++, .NET, drivers…)`);
+  if (hiddenKept > 0) notes.push(plural(hiddenKept, 'item que você já manteve oculto', 'itens que você já manteve ocultos'));
+  $('#summarySub').innerHTML =
     `${bytes(totalBytes)} no total. Escolha por onde começar.` +
-    (hiddenKept ? ` (${plural(hiddenKept, 'item que você já manteve está oculto', 'itens que você já manteve estão ocultos')})` : '');
+    (notes.length ? `<br/><span class="hidden-note">${esc(notes.join(' · '))} · <button class="link" id="hiddenSettings">ver nas Configurações</button></span>` : '');
+  const hs = $('#hiddenSettings');
+  if (hs) hs.addEventListener('click', () => {
+    renderSettings();
+    $('#settings').hidden = false;
+  });
 
   $('#tiles').innerHTML = CAT_ORDER.map((c) => {
     const all = total.filter((it) => catOf(it) === c);
@@ -793,6 +803,7 @@ async function runRemoval(sel) {
 function renderSettings() {
   $('#optCovers').checked = !!state.settings.onlineCovers;
   $('#optShowKept').checked = !!state.settings.showKept;
+  $('#optShowSystem').checked = !!state.settings.showSystem;
   const nKept = Object.keys(state.kept).length;
   $('#keptInfo').textContent = nKept
     ? `${plural(nKept, 'item que você manteve não aparece', 'itens que você manteve não aparecem')} nas novas análises.`
@@ -811,7 +822,7 @@ function renderSettings() {
 async function setSetting(k, v) {
   state.settings[k] = v;
   if (!DEMO) state.settings = await api.setSettings({ [k]: v });
-  if (k === 'showKept' && state.items.length) {
+  if ((k === 'showKept' || k === 'showSystem') && state.items.length) {
     if (!$('#screen-summary').hidden) renderSummary();
     if (!$('#screen-deck').hidden) renderDeck();
   }
@@ -907,6 +918,7 @@ $('#settings').addEventListener('click', (e) => {
 });
 $('#optCovers').addEventListener('change', (e) => setSetting('onlineCovers', e.target.checked));
 $('#optShowKept').addEventListener('change', (e) => setSetting('showKept', e.target.checked));
+$('#optShowSystem').addEventListener('change', (e) => setSetting('showSystem', e.target.checked));
 $('#clearKeptBtn').addEventListener('click', async () => {
   state.kept = {};
   if (!DEMO) await api.clearDecisions();

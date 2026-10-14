@@ -8,6 +8,7 @@ const fs = require('fs');
 const fsp = fs.promises;
 const { spawn } = require('child_process');
 const games = require('./games.js');
+const { isSystemComponent } = require('./system-filter.js');
 
 const MB = 1024 * 1024;
 const opts = workerData || {};
@@ -220,7 +221,9 @@ async function enrichProgram(p, prefetch) {
     risky: RISKY.test(p.name) || RISKY.test(p.publisher || ''),
     key: p.key,
     uninstall: p.uninstall,
-    isGame: games.isGameProgram({ name: p.name, publisher: p.publisher, location }),
+    // bibliotecas e drivers (Visual C++, .NET, DirectX...) ficam ocultos por padrão
+    system: isSystemComponent(p.name, p.publisher),
+    isGame: !isSystemComponent(p.name, p.publisher) && games.isGameProgram({ name: p.name, publisher: p.publisher, location }),
   };
 }
 

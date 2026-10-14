@@ -23,6 +23,9 @@
       <rect x="240" y="640" width="120" height="60" rx="14" fill="#ff3d81"/><circle cx="300" cy="420" r="60" fill="#ffe04d" opacity=".85"/>`);
 
   window.DEMO_DATA = [
+    { id: 'p:sys1', kind: 'program', system: true, risky: true, name: 'Microsoft Visual C++ 2013 Redistributable (x64) - 12.0.40664', publisher: 'Microsoft Corporation', version: '12.0', installDate: '20230901', size: 20 * MB, lastUsed: null },
+    { id: 'p:sys2', kind: 'program', system: true, risky: true, name: 'Microsoft .NET Framework 4.6.1 SDK', publisher: 'Microsoft Corporation', version: '4.6.1', installDate: '20230901', size: 160 * MB, lastUsed: null },
+    { id: 'p:sys3', kind: 'program', system: true, risky: true, name: 'Microsoft Visual C++ 2013 x86 Minimum Runtime', publisher: 'Microsoft Corporation', version: '12.0', installDate: '20230901', size: 3 * MB, lastUsed: null },
     { id: 'g:steam:1', kind: 'game', platform: 'steam', appid: '1', name: 'Galáxia Perdida', size: 92 * GB, lastUsed: now - 410 * DAY, updated: now - 20 * DAY, location: 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Galaxia', cover: galaxia, coverPortrait: true },
     { id: 'g:steam:2', kind: 'game', platform: 'steam', appid: '2', name: 'Neon Rush', size: 48 * GB, lastUsed: now - 3 * DAY, updated: now - 2 * DAY, location: 'D:\\SteamLibrary\\steamapps\\common\\NeonRush', cover: neon, coverPortrait: true },
     { id: 'g:steam:3', kind: 'game', platform: 'steam', appid: '3', name: 'Reino de Pedra: Edição Definitiva', size: 31 * GB, lastUsed: null, neverPlayed: true, updated: now - 200 * DAY, location: 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Reino' },
@@ -32,7 +35,7 @@
     { id: 'f:1', kind: 'download', name: 'Windows11_23H2_PTBR.iso', size: 6.2 * GB, modified: now - 300 * DAY, isDir: false, detail: 'Em Downloads', path: 'C:\\Users\\Voce\\Downloads\\Windows11_23H2_PTBR.iso' },
     { id: 'p:3', kind: 'program', name: 'Android Studio', publisher: 'Google LLC', version: '2024.1', installDate: '20240520', location: 'C:\\Program Files\\Android', size: 3.1 * GB, lastUsed: now - 40 * DAY },
     { id: 'f:2', kind: 'cache', name: 'Cache do npm', size: 4.4 * GB, detail: 'Pacotes baixados pelo npm. Eles são baixados de novo quando um projeto precisar.', path: 'C:\\Users\\Voce\\AppData\\Local\\npm-cache' },
-    { id: 'p:4', kind: 'program', name: 'Microsoft Visual C++ 2015-2022 Redistributable (x64)', publisher: 'Microsoft Corporation', version: '14.38', installDate: '20230901', size: 24 * MB, lastUsed: null, risky: true },
+    { id: 'p:4', kind: 'program', system: true, name: 'Microsoft Visual C++ 2015-2022 Redistributable (x64)', publisher: 'Microsoft Corporation', version: '14.38', installDate: '20230901', size: 24 * MB, lastUsed: null, risky: true },
     { id: 'f:3', kind: 'temp', name: 'Arquivos temporários', size: 2.3 * GB, detail: 'Sobras de instaladores e programas. Arquivos em uso agora são mantidos automaticamente.', path: 'C:\\Users\\Voce\\AppData\\Local\\Temp' },
     { id: 's:1', kind: 'store', name: 'Paciência Clássica', publisher: 'Estúdio Exemplo', version: '4.19', installDate: '20230115', size: 380 * MB, lastUsed: null },
     { id: 'p:5', kind: 'program', name: 'Chat Desktop', publisher: 'Exemplo Inc.', version: '1.0.9165', installDate: '20250412', location: 'C:\\Users\\Voce\\AppData\\Local\\Chat', size: 410 * MB, lastUsed: now - 1 * DAY },

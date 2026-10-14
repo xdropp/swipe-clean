@@ -2,6 +2,12 @@
 
 Todas as mudanças de cada versão do Swipe Clean.
 
+## [1.3.0] - 2026-10-14
+
+### Novo
+- Componentes do sistema (Visual C++, .NET, DirectX, SDKs, drivers e partes do Visual Studio e do SQL Server) não aparecem mais como cartas. Jogos e programas precisam deles, e eles ocupavam espaço na lista sem liberar quase nada.
+- O resumo mostra quantos componentes ficaram ocultos, e dá para exibi-los em **⚙ Configurações → Mostrar componentes do sistema**.
+
 ## [1.2.1] - 2026-10-14
 
 ### Corrigido
