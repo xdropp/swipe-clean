@@ -22,6 +22,11 @@ Apenas quando a opção **Buscar capas de jogos na internet** está ligada (ela 
 
 As capas baixadas ficam guardadas no seu PC para não precisarem ser buscadas de novo.
 
+Apenas quando a opção **Procurar atualizações ao abrir o app** está ligada (ela vem ligada e pode ser desligada em Configurações):
+
+- Ao abrir, o app pergunta ao GitHub (`api.github.com`) qual é o **número da versão mais nova**. Nada sobre o seu PC é enviado.
+- Se houver versão nova e você escolher instalar, o instalador é baixado do GitHub (`github.com`) e o SHA-256 dele é conferido com o `SHA256SUMS.txt` publicado antes de ser executado.
+
 ## Doações
 
 O botão de doação (só na versão em português) mostra apenas um QR Code e um código Pix gerados no próprio app. O pagamento é feito no aplicativo do seu banco; o Swipe Clean não recebe, vê nem guarda nenhum dado de pagamento.
@@ -36,5 +41,7 @@ Em `%APPDATA%\Swipe Clean\`:
 | `decisoes.json` | O que você escolheu manter, para não mostrar de novo |
 | `covers\` | Capas de jogos já baixadas |
 | `log.txt` | Diagnóstico da última execução (recriado a cada abertura) |
+
+Os instaladores de atualização são baixados na pasta temporária do Windows (`%TEMP%\swipe-clean-update\`).
 
 Para apagar tudo, desinstale o app e remova essa pasta.

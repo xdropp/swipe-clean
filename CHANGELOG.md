@@ -2,6 +2,14 @@
 
 All notable changes to Swipe Clean.
 
+## [1.5.0] - 2026-10-14
+
+### New
+- **Automatic updates.** When a new version is out, a banner shows up. The installed version downloads it, checks its SHA-256 and installs it with one click; the portable version opens the download page. The check can be turned off in **Settings → Updates**.
+- Every release now includes `SHA256SUMS.txt`, so anyone can confirm the download is genuine.
+
+> Versions 1.4.0 and earlier don't have the updater, so this one needs to be downloaded by hand. From 1.5.0 on, updates arrive inside the app.
+
 ## [1.4.0] - 2026-10-14
 
 ### New

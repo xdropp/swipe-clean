@@ -16,7 +16,7 @@ Jogos, aplicativos e pastas pesadas aparecem um de cada vez: deslize para a esqu
 
 [English](README.md) · **Português**
 
-<img src="docs/img/pt-BR/game.png" width="760" alt="Carta de um jogo sendo deslizada para a esquerda" />
+<img src="docs/img/pt-BR/demo.gif" width="760" alt="Cartas de jogos sendo deslizadas para remover e manter" />
 
 </div>
 
@@ -36,7 +36,8 @@ Ferramentas de limpeza costumam mostrar uma lista enorme e assustadora. O Swipe 
 - **Arquivos pessoais vão para a Lixeira**, então dá para recuperar.
 - **Programas e jogos saem pelo desinstalador oficial** deles, ou pela própria Steam ou Epic.
 - **Componentes do sistema ficam de fora.** Visual C++, .NET, DirectX, drivers e outras bibliotecas que jogos e programas precisam não viram cartas.
-- **Nada sai do seu PC.** Sem conta, sem anúncios, sem telemetria. Veja a [política de privacidade](PRIVACIDADE.md).
+- **Sem conta, sem anúncios, sem telemetria.** A lista dos seus programas nunca sai do PC. Veja a [política de privacidade](PRIVACIDADE.md).
+- **Se atualiza com segurança.** A versão instalada baixa as novas versões desta página e confere o SHA-256 antes de instalar.
 
 <img src="docs/img/pt-BR/review.png" width="760" alt="Revisão das remoções antes de confirmar" />
 
@@ -46,6 +47,8 @@ Ferramentas de limpeza costumam mostrar uma lista enorme e assustadora. O Swipe 
    - **`SwipeClean-Setup-x.y.z.exe`** instala com atalhos no menu Iniciar (recomendado).
    - **`SwipeClean-Portable-x.y.z.exe`** abre direto, sem instalar.
 2. Abra o arquivo baixado. Não precisa instalar mais nada.
+
+Quando sai uma versão nova, o app avisa. A versão instalada se atualiza com um clique; a portátil leva para o download. Dá para desligar a verificação em **⚙ Configurações**.
 
 O app segue o idioma do Windows (português ou inglês). Dá para trocar em **⚙ Configurações → Idioma**.
 
@@ -84,6 +87,18 @@ Arquivos e pastas estão na **Lixeira**: é só restaurar de lá. Programas e jo
 </details>
 
 <details>
+<summary><b>Como sei que o arquivo baixado é original?</b></summary>
+
+Toda versão é compilada pelo GitHub Actions direto do código deste repositório e vem com um arquivo `SHA256SUMS.txt`. Para conferir, rode no PowerShell e compare o resultado com o arquivo:
+
+```powershell
+Get-FileHash .\SwipeClean-Setup-x.y.z.exe -Algorithm SHA256
+```
+
+A atualização automática faz essa mesma conferência antes de instalar qualquer coisa.
+</details>
+
+<details>
 <summary><b>Funciona em Mac ou Linux?</b></summary>
 
 Por enquanto, só Windows 10 e 11.
@@ -93,7 +108,7 @@ Por enquanto, só Windows 10 e 11.
 
 Encontrou um erro ou tem uma ideia? [Abra uma issue](https://github.com/xdropp/swipe-clean/issues/new/choose) (pode escrever em português). Para erros, anexe o `log.txt` (**⚙ Configurações → Abrir pasta**). Ele ajuda muito a descobrir o que aconteceu.
 
-As novidades de cada versão estão no [CHANGELOG](CHANGELOG.md). Para rodar o código ou contribuir, veja o [guia de desenvolvimento](docs/DEVELOPMENT.md) (em inglês).
+As novidades de cada versão estão no [CHANGELOG](CHANGELOG.md). Quer ajudar? Veja o [CONTRIBUTING](CONTRIBUTING.md) e o [guia de desenvolvimento](docs/DEVELOPMENT.md) (em inglês). Para relatar uma falha de segurança de forma privada, veja o [SECURITY](SECURITY.md).
 
 ## Licença
 

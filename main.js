@@ -12,6 +12,7 @@ const { Worker } = require('worker_threads');
 const { execFile, spawn } = require('child_process');
 const pix = require('./pix.js');
 const i18n = require('./i18n.js');
+const updater = require('./updater.js');
 
 const IS_WIN = process.platform === 'win32';
 const AUTO_SCAN = process.argv.includes('--auto-scan'); // usado pelo diagnostico.bat
@@ -53,7 +54,7 @@ process.on('unhandledRejection', (e) => writeLog('Promise rejeitada: ' + ((e && 
 
 // ---------------------------------------------------------------- configurações
 
-const DEFAULT_SETTINGS = { onlineCovers: true, showKept: false, showSystem: false, language: 'auto' };
+const DEFAULT_SETTINGS = { onlineCovers: true, showKept: false, showSystem: false, language: 'auto', autoUpdate: true };
 
 // idioma: "auto" segue o Windows (português → pt-BR, qualquer outro → inglês)
 let lang = 'en';
@@ -423,6 +424,40 @@ ipcMain.handle('settings-set', (_e, patch) => {
   return settings;
 });
 ipcMain.handle('open-logs', () => shell.openPath(app.getPath('userData')));
+
+// ---------------------------------------------------------------- atualizações
+
+let updateInfo = null;
+ipcMain.handle('update-check', async () => {
+  try {
+    updateInfo = await updater.check();
+    writeLog(`Atualização: instalada ${updateInfo.current}, mais nova ${updateInfo.version} (${updateInfo.available ? 'disponível' : 'em dia'}, ${updateInfo.kind})`);
+    const { setupUrl, sumsUrl, ...forUi } = updateInfo;
+    return forUi;
+  } catch (e) {
+    writeLog('Atualização: não foi possível verificar: ' + e.message);
+    return { error: 'network' };
+  }
+});
+ipcMain.handle('update-install', async () => {
+  if (!updateInfo || !updateInfo.available) return { error: 'none' };
+  if (!updateInfo.canInstall) {
+    updater.openReleases();
+    return { opened: true };
+  }
+  try {
+    await updater.install(updateInfo, {
+      onProgress: (pct) => send('update-progress', { pct }),
+      log: writeLog,
+      beforeQuit: () => app.releaseSingleInstanceLock(),
+    });
+    return { installing: true };
+  } catch (e) {
+    writeLog('Atualização falhou: ' + e.message);
+    return { error: /checksum/.test(e.message) ? 'checksum' : 'network' };
+  }
+});
+ipcMain.handle('update-open', () => updater.openReleases());
 
 ipcMain.handle('open-location', async (_e, id) => {
   const it = lastScan.get(id);

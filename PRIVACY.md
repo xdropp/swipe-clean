@@ -22,6 +22,11 @@ Only when **Fetch game covers from the internet** is on (it's on by default and 
 
 Downloaded covers are saved on your PC so they don't need to be fetched again.
 
+Only when **Check for updates when the app opens** is on (it's on by default and can be turned off in Settings):
+
+- When the app opens, it asks GitHub (`api.github.com`) for the **number of the latest version**. Nothing about your PC is sent.
+- If there's a new version and you choose to install it, the installer is downloaded from GitHub (`github.com`) and its SHA-256 is checked against the published `SHA256SUMS.txt` before it runs.
+
 ## Donations
 
 The donation button (Portuguese version only) just shows a Pix QR code and code generated inside the app. Payment happens in your banking app; Swipe Clean never receives, sees or stores any payment data.
@@ -36,5 +41,7 @@ In `%APPDATA%\Swipe Clean\`:
 | `decisoes.json` | What you chose to keep, so it isn't shown again |
 | `covers\` | Game covers already downloaded |
 | `log.txt` | Diagnostics for the last run (recreated every time the app opens) |
+
+Update installers are downloaded to the Windows temporary folder (`%TEMP%\swipe-clean-update\`).
 
 To delete everything, uninstall the app and remove that folder.

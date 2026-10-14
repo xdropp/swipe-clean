@@ -19,6 +19,14 @@
   </header>
 
   <div class="demo-banner" id="demoBanner" data-i18n="app.demoBanner" hidden></div>
+  <div class="update-banner" id="updateBanner" hidden>
+    <span class="update-dot" aria-hidden="true"></span>
+    <span id="updateText"></span>
+    <button class="link" id="updateNotes" data-i18n="update.whatsNew"></button>
+    <span class="spacer"></span>
+    <button class="ghost small" id="updateLater" data-i18n="update.later"></button>
+    <button class="primary small" id="updateBtn" data-i18n="update.install"></button>
+  </div>
 
   <main>
     <!-- início -->
@@ -208,6 +216,22 @@
           <span id="adminInfo">—</span>
         </div>
         <button class="ghost small" id="adminBtn" data-i18n="settings.adminBtn"></button>
+      </div>
+
+      <label class="setting">
+        <div>
+          <b data-i18n="settings.autoUpdate"></b>
+          <span data-i18n="settings.autoUpdateHint"></span>
+        </div>
+        <input type="checkbox" class="switch" id="optAutoUpdate" />
+      </label>
+
+      <div class="setting">
+        <div>
+          <b data-i18n="settings.updates"></b>
+          <span id="updateInfo"></span>
+        </div>
+        <button class="ghost small" id="checkUpdateBtn" data-i18n="settings.checkNow"></button>
       </div>
 
       <div class="setting">

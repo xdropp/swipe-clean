@@ -41,9 +41,11 @@ const state = {
   front: null, // id que deve voltar ao topo (desfazer)
   cat: 'games',
   kept: {}, // decisões "manter" salvas entre sessões
-  settings: { onlineCovers: true, showKept: false, showSystem: false },
+  settings: { onlineCovers: true, showKept: false, showSystem: false, autoUpdate: true },
   info: { version: '', admin: false },
   donate: { enabled: false },
+  update: null, // resultado da última verificação de atualização
+  updateStatus: '', // texto mostrado nas Configurações
   donateIdx: 0,
   disk: null,
   prefetchAvailable: true,
@@ -812,6 +814,8 @@ function renderSettings() {
   $('#optCovers').checked = !!state.settings.onlineCovers;
   $('#optShowKept').checked = !!state.settings.showKept;
   $('#optShowSystem').checked = !!state.settings.showSystem;
+  $('#optAutoUpdate').checked = state.settings.autoUpdate !== false;
+  $('#updateInfo').textContent = state.updateStatus || t('settings.upToDate', { version: DEMO ? 'demo' : state.info.version });
   const nKept = Object.keys(state.kept).length;
   $('#keptInfo').textContent = nKept ? t('settings.keptInfo', { n: nKept }) : t('settings.noKept');
   $('#optLanguage').value = state.settings.language || 'auto';
@@ -888,6 +892,64 @@ async function copyText(text) {
   } catch {}
 }
 
+
+// ---------------------------------------------------------------- atualizações
+
+async function checkForUpdate(manual) {
+  if (DEMO) {
+    state.updateStatus = t('settings.upToDate', { version: 'demo' });
+    renderSettings();
+    return;
+  }
+  state.updateStatus = t('settings.checking');
+  if (manual) renderSettings();
+  const r = await api.checkUpdate().catch(() => ({ error: 'network' }));
+  if (r.error) {
+    state.updateStatus = t('settings.updateError');
+  } else if (r.available) {
+    state.update = r;
+    state.updateStatus = t('settings.updateFound', { version: r.version });
+    showUpdateBanner();
+  } else {
+    state.updateStatus = t('settings.upToDate', { version: r.current });
+  }
+  if (!$('#settings').hidden) renderSettings();
+}
+
+function showUpdateBanner() {
+  const u = state.update;
+  if (!u) return;
+  const banner = $('#updateBanner');
+  banner.classList.remove('error');
+  $('#updateText').textContent = t('update.available', { version: u.version });
+  $('#updateBtn').textContent = u.canInstall ? t('update.install') : t('update.download');
+  $('#updateBtn').disabled = false;
+  $('#updateLater').hidden = false;
+  $('#updateNotes').hidden = false;
+  banner.hidden = false;
+}
+
+async function runUpdate() {
+  const u = state.update;
+  if (!u) return;
+  if (!u.canInstall) {
+    api.openReleases(); // versão portátil ou falha anterior: abre a página de download
+    return;
+  }
+  $('#updateBtn').disabled = true;
+  $('#updateLater').hidden = true;
+  $('#updateNotes').hidden = true;
+  $('#updateText').textContent = t('update.downloading', { pct: 0 });
+  const r = await api.installUpdate().catch(() => ({ error: 'network' }));
+  if (r && r.error) {
+    $('#updateBanner').classList.add('error');
+    $('#updateText').textContent = t('update.failed', { msg: t('update.err.' + (r.error === 'checksum' ? 'checksum' : 'network')) });
+    $('#updateBtn').disabled = false;
+    $('#updateBtn').textContent = t('update.download');
+    state.update = { ...u, canInstall: false };
+  }
+}
+
 // ---------------------------------------------------------------- eventos
 
 $('#startBtn').addEventListener('click', startScan);
@@ -927,6 +989,11 @@ $('#optCovers').addEventListener('change', (e) => setSetting('onlineCovers', e.t
 $('#optShowKept').addEventListener('change', (e) => setSetting('showKept', e.target.checked));
 $('#optShowSystem').addEventListener('change', (e) => setSetting('showSystem', e.target.checked));
 $('#optLanguage').addEventListener('change', (e) => setSetting('language', e.target.value));
+$('#optAutoUpdate').addEventListener('change', (e) => setSetting('autoUpdate', e.target.checked));
+$('#checkUpdateBtn').addEventListener('click', () => checkForUpdate(true));
+$('#updateBtn').addEventListener('click', runUpdate);
+$('#updateLater').addEventListener('click', () => ($('#updateBanner').hidden = true));
+$('#updateNotes').addEventListener('click', () => !DEMO && api.openReleases());
 $('#clearKeptBtn').addEventListener('click', async () => {
   state.kept = {};
   if (!DEMO) await api.clearDecisions();
@@ -962,6 +1029,9 @@ document.addEventListener('keydown', (e) => {
 if (!DEMO) {
   api.onScanProgress(onScanProgress);
   api.onRemoveProgress(setRowStatus);
+  api.onUpdateProgress(({ pct }) => {
+    $('#updateText').textContent = pct >= 100 ? t('update.installing') : t('update.downloading', { pct });
+  });
 }
 
 // ---------------------------------------------------------------- início
@@ -994,6 +1064,7 @@ if (!DEMO) {
   }
   updateTop();
   if (api && api.autoScan) setTimeout(startScan, 500);
+  if (!DEMO && state.settings.autoUpdate !== false) setTimeout(() => checkForUpdate(false), 2500);
   logToFile(`Tela pronta (demo: ${DEMO ? 'sim' : 'não'}, admin: ${state.info.admin ? 'sim' : 'não'}, versão ${state.info.version})`);
 })();
 })();

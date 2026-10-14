@@ -2,7 +2,8 @@
 #
 # Como usar: aumente "version" no package.json, adicione a seção da versão no CHANGELOG.md
 # e envie para a branch main. Se ainda não existir um Release com essa versão, o GitHub
-# compila no Windows, cria a tag vX.Y.Z e publica o instalador e a versão portátil.
+# compila no Windows, cria a tag vX.Y.Z e publica o instalador, a versão portátil e o
+# SHA256SUMS.txt (o app confere esse arquivo antes de instalar uma atualização).
 # Envios que não mudam a versão não publicam nada.
 #
 # Doação por Pix: configure os segredos PIX_KEY, PIX_NOME e PIX_CIDADE em
@@ -82,6 +83,17 @@ jobs:
         if: steps.versao.outputs.publicar == 'true'
         run: npx electron-builder --win nsis portable --publish never
 
+      - name: Somas SHA-256 (usadas pela atualização automática)
+        if: steps.versao.outputs.publicar == 'true'
+        shell: pwsh
+        run: |
+          $lines = Get-ChildItem dist -File | Where-Object { $_.Name -match '^SwipeClean-(Setup|Portable)-.*\.exe$' } | Sort-Object Name | ForEach-Object {
+            "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)"
+          }
+          if (-not $lines) { throw "Nenhum .exe encontrado em dist" }
+          [IO.File]::WriteAllText("dist/SHA256SUMS.txt", (($lines -join "`n") + "`n"))
+          Get-Content dist/SHA256SUMS.txt
+
       - name: Notas da versão a partir do CHANGELOG
         if: steps.versao.outputs.publicar == 'true'
         shell: pwsh
@@ -90,7 +102,8 @@ jobs:
           $log = Get-Content CHANGELOG.md -Raw
           $m = [regex]::Match($log, "(?ms)^## \[$([regex]::Escape($version))\][^\n]*\n(.*?)(?=^## \[|\z)")
           $notes = if ($m.Success) { $m.Groups[1].Value.Trim() } else { "Swipe Clean $version" }
-          $notes += "`n`n---`n**Which one?** ``SwipeClean-Setup`` installs with Start menu shortcuts. ``SwipeClean-Portable`` runs directly, no installation. · **Qual baixar?** ``Setup`` instala com atalhos; ``Portable`` abre direto, sem instalar.`n`nIf Windows shows ""Windows protected your PC"", click **More info → Run anyway**. · Se aparecer ""O Windows protegeu o computador"", clique em **Mais informações → Executar assim mesmo**."
+          $sums = (Get-Content dist/SHA256SUMS.txt -Raw).Trim()
+          $notes += "`n`n---`n**Which one?** ``SwipeClean-Setup`` installs with Start menu shortcuts. ``SwipeClean-Portable`` runs directly, no installation. · **Qual baixar?** ``Setup`` instala com atalhos; ``Portable`` abre direto, sem instalar.`n`nIf Windows shows ""Windows protected your PC"", click **More info → Run anyway**. · Se aparecer ""O Windows protegeu o computador"", clique em **Mais informações → Executar assim mesmo**.`n`n<details><summary>SHA-256</summary>`n`n``````n$sums`n```````n</details>"
           Set-Content release-notes.md $notes -Encoding utf8NoBOM
 
       - name: Publicar no GitHub Releases
@@ -105,3 +118,4 @@ jobs:
           files: |
             dist/SwipeClean-Setup-*.exe
             dist/SwipeClean-Portable-*.exe
+            dist/SHA256SUMS.txt

@@ -464,3 +464,14 @@ button:disabled.ghost { opacity: .45; cursor: default; }
   padding: 7px 10px; font: inherit; font-size: 13px; cursor: pointer; flex-shrink: 0;
 }
 .select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* ---------- aviso de atualização */
+.update-banner {
+  display: flex; align-items: center; gap: 12px; padding: 9px 24px; font-size: 14px;
+  background: linear-gradient(90deg, rgba(47,227,154,.12), rgba(124,140,255,.12)); border-bottom: 1px solid rgba(47,227,154,.25);
+}
+.update-banner .spacer { flex: 1; }
+.update-banner .link { font-size: 14px; }
+.update-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(47,227,154,.18); flex-shrink: 0; }
+.update-banner.error { background: var(--red-soft); border-bottom-color: rgba(255,77,109,.3); }
+.update-banner.error .update-dot { background: var(--red); box-shadow: 0 0 0 4px rgba(255,77,109,.18); }

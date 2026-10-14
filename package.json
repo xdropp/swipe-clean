@@ -1,7 +1,7 @@
 {
   "name": "swipe-clean",
   "productName": "Swipe Clean",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Free up space on your PC by swiping cards: left removes, right keeps. Games, apps and large folders.",
   "main": "main.js",
   "author": "Gabriel Froes",
@@ -39,6 +39,7 @@
       "games.js",
       "system-filter.js",
       "i18n.js",
+      "updater.js",
       "pix.js",
       "doacao.json",
       "vendor/**",

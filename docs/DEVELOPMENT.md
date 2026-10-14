@@ -21,6 +21,7 @@ scanner.js        heavy scanning and cleanup in a worker thread (keeps the windo
 games.js          Steam, Epic and other game detection
 system-filter.js  hides system components (Visual C++, .NET, DirectX, drivers…)
 i18n.js           all user-facing text, in Portuguese (pt-BR) and English (en)
+updater.js        checks GitHub Releases and installs updates after checking SHA-256
 pix.js            Pix QR code generation (Brazilian BR Code standard)
 preload.js        secure bridge between the UI and the main process
 scripts/*.ps1     reads the Windows registry and Store apps
@@ -62,6 +63,15 @@ Versions are built and published automatically by GitHub Actions (`.github/workf
 2. Add a `## [1.5.0] - YYYY-MM-DD` section to `CHANGELOG.md`. It becomes the release notes.
 3. Commit and push to `main`.
 
-If there's no Release for that version yet, GitHub builds on Windows, creates the `v1.5.0` tag and publishes both `.exe` files under **Releases** within a few minutes. Pushes that don't change the version don't publish anything, so documentation fixes are safe to push.
+If there's no Release for that version yet, GitHub builds on Windows, creates the `v1.5.0` tag and publishes both `.exe` files plus `SHA256SUMS.txt` under **Releases** within a few minutes. Pushes that don't change the version don't publish anything, so documentation fixes are safe to push.
 
 To retry a failed publish, use **Actions → Publicar versão → Run workflow**.
+
+## Updates
+
+On startup (unless turned off in Settings), `updater.js` reads `releases/latest` from the GitHub API and compares the tag with the app version.
+
+- **Installed version:** downloads `SwipeClean-Setup-x.y.z.exe`, checks its SHA-256 against the line with the same file name in `SHA256SUMS.txt`, then runs it with `/S --updated --force-run` (silent install that reopens the app). If the checksum doesn't match, the file is deleted and nothing runs.
+- **Portable version and `npm start`:** only shows the banner and opens the download page.
+
+A release without `SHA256SUMS.txt` can't be installed automatically, so keep that file in every release.
