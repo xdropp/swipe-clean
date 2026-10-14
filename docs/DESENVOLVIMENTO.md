@@ -53,12 +53,3 @@ As versões são compiladas e publicadas automaticamente pelo GitHub Actions (`.
 Se ainda não existir um Release com essa versão, o GitHub compila no Windows, cria a tag `v1.3.0` e publica os dois `.exe` em **Releases** em alguns minutos. Envios que não mudam a versão não publicam nada, então dá para enviar correções de documentação à vontade.
 
 Para tentar de novo uma publicação que falhou, use **Actions → Publicar versão → Run workflow**.
-
-## Doação por Pix
-
-O botão de doação lê o arquivo `doacao.json`, que **não fica no repositório** (está no `.gitignore`). Cada pessoa que distribui o app usa a própria chave.
-
-- **No build automático:** configure os segredos `PIX_KEY`, `PIX_NOME` e `PIX_CIDADE` em **Settings → Secrets and variables → Actions**. Sem `PIX_KEY`, a versão sai sem o botão.
-- **No build local:** copie `doacao.exemplo.json` para `doacao.json` e preencha.
-
-Prefira uma **chave aleatória**: ela fica visível para quem usa o app. `nome` e `cidade` aparecem para quem doa (sem acentos, até 25 e 15 caracteres).
