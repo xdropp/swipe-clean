@@ -822,6 +822,10 @@ function renderSettings() {
   $('#clearKeptBtn').disabled = !nKept;
   $('#adminInfo').textContent = DEMO ? t('settings.adminDemo') : state.info.admin ? t('settings.adminYes') : t('settings.adminNo');
   $('#adminBtn').hidden = DEMO || state.info.admin;
+  // Versão da Microsoft Store: a loja cuida das atualizações e o app não pode pedir administrador
+  $('#adminSetting').hidden = !!state.info.store;
+  $('#autoUpdateSetting').hidden = !!state.info.store;
+  $('#updateSetting').hidden = !!state.info.store;
   $('#donateSetting').hidden = !state.donate.enabled;
   $('#about').textContent = t('settings.about', { version: DEMO ? t('settings.demo') : 'v' + state.info.version });
 }
@@ -1060,11 +1064,11 @@ if (!DEMO) {
     state.settings = settings || state.settings;
     state.info = info || state.info;
     if (state.info.lang && state.info.lang !== lang) setLanguage(state.info.lang);
-    $('#adminNote').hidden = state.info.admin;
+    $('#adminNote').hidden = state.info.admin || !!state.info.store;
   }
   updateTop();
   if (api && api.autoScan) setTimeout(startScan, 500);
-  if (!DEMO && state.settings.autoUpdate !== false) setTimeout(() => checkForUpdate(false), 2500);
-  logToFile(`Tela pronta (demo: ${DEMO ? 'sim' : 'não'}, admin: ${state.info.admin ? 'sim' : 'não'}, versão ${state.info.version})`);
+  if (!DEMO && !state.info.store && state.settings.autoUpdate !== false) setTimeout(() => checkForUpdate(false), 2500);
+  logToFile(`Tela pronta (demo: ${DEMO ? 'sim' : 'não'}, admin: ${state.info.admin ? 'sim' : 'não'}, versão ${state.info.version}${state.info.store ? ', Microsoft Store' : ''})`);
 })();
 })();

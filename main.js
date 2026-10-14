@@ -410,7 +410,9 @@ async function resolveCover(it) {
 
 ipcMain.on('log', (_e, text) => writeLog('Tela: ' + String(text).slice(0, 2000)));
 ipcMain.handle('disk-info', () => diskInfo());
-ipcMain.handle('app-info', async () => ({ version: app.getVersion(), admin: await isAdmin(), packaged: app.isPackaged, lang }));
+// process.windowsStore: instalado pela Microsoft Store (pacote MSIX)
+const IS_STORE = !!process.windowsStore;
+ipcMain.handle('app-info', async () => ({ version: app.getVersion(), admin: await isAdmin(), packaged: app.isPackaged, store: IS_STORE, lang }));
 ipcMain.handle('settings-get', () => settings);
 ipcMain.handle('settings-set', (_e, patch) => {
   for (const k of Object.keys(patch || {})) {
@@ -423,7 +425,24 @@ ipcMain.handle('settings-set', (_e, patch) => {
   writeLog('Configurações: ' + JSON.stringify(settings));
   return settings;
 });
-ipcMain.handle('open-logs', () => shell.openPath(app.getPath('userData')));
+// Na versão da Store, o Windows guarda o AppData do app numa pasta própria do pacote.
+// O Explorer não enxerga o caminho virtual, então abrimos a pasta real.
+function realUserDataDir() {
+  const dir = app.getPath('userData');
+  if (!IS_STORE) return dir;
+  try {
+    // ...\WindowsApps\<Nome>_<Versão>_<Arq>_<Recurso>_<IdEditor>\...
+    const m = process.execPath.match(/WindowsApps[\\/]([^\\/]+)/i);
+    const parts = m ? m[1].split('_') : [];
+    if (parts.length >= 2 && process.env.LOCALAPPDATA) {
+      const family = parts[0] + '_' + parts[parts.length - 1];
+      const real = path.join(process.env.LOCALAPPDATA, 'Packages', family, 'LocalCache', 'Roaming', path.basename(dir));
+      if (fs.existsSync(real)) return real;
+    }
+  } catch {}
+  return dir;
+}
+ipcMain.handle('open-logs', () => shell.openPath(realUserDataDir()));
 
 // ---------------------------------------------------------------- atualizações
 
@@ -468,7 +487,7 @@ ipcMain.handle('open-location', async (_e, id) => {
 });
 
 ipcMain.handle('relaunch-admin', async () => {
-  if (!IS_WIN) return false;
+  if (!IS_WIN || IS_STORE) return false;
   const q = (s) => "'" + String(s).replace(/'/g, "''") + "'";
   const args = app.isPackaged ? [] : [app.getAppPath()];
   const cmd =

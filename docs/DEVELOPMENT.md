@@ -75,3 +75,24 @@ On startup (unless turned off in Settings), `updater.js` reads `releases/latest`
 - **Portable version and `npm start`:** only shows the banner and opens the download page.
 
 A release without `SHA256SUMS.txt` can't be installed automatically, so keep that file in every release.
+
+## Microsoft Store
+
+The Store version is an MSIX package built by `.github/workflows/store.yml`. The Store signs it, so there is no SmartScreen warning, and it updates the app itself, so the built-in updater and the "Restart as admin" option are turned off when `process.windowsStore` is true.
+
+One-time setup: copy the three values from Partner Center → **Product management → Product identity** into the repository variables `STORE_IDENTITY_NAME`, `STORE_PUBLISHER` and `STORE_PUBLISHER_NAME`.
+
+For each version: publish the GitHub release first, then run **Actions → Pacote da Microsoft Store → Run workflow**, download the `.appx` from the run's artifacts and upload it in a new Partner Center submission.
+
+Tile images live in `build/appx/`.
+
+## winget
+
+The package is `GabrielFroes.SwipeClean`. The first version was submitted by hand from `packaging/winget/manifests/`:
+
+```powershell
+winget install Microsoft.WingetCreate
+wingetcreate submit packaging\winget\manifests\g\GabrielFroes\SwipeClean\1.5.0
+```
+
+After that, the `winget` job in the release workflow opens the pull request to `microsoft/winget-pkgs` for every new version, as long as the `WINGET_TOKEN` secret (a classic GitHub token with the `public_repo` scope) is set.

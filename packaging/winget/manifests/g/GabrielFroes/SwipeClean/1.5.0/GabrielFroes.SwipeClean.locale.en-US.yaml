@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+PackageIdentifier: GabrielFroes.SwipeClean
+PackageVersion: 1.5.0
+PackageLocale: en-US
+Publisher: Gabriel Froes
+PublisherUrl: https://github.com/xdropp
+PublisherSupportUrl: https://github.com/xdropp/swipe-clean/issues
+PrivacyUrl: https://github.com/xdropp/swipe-clean/blob/main/PRIVACY.md
+Author: Gabriel Froes
+PackageName: Swipe Clean
+PackageUrl: https://github.com/xdropp/swipe-clean
+License: MIT
+LicenseUrl: https://github.com/xdropp/swipe-clean/blob/main/LICENSE.txt
+Copyright: Copyright (c) 2026 Gabriel Froes
+ShortDescription: Free up disk space by swiping cards. Games, apps and large folders, one at a time.
+Description: |-
+  Swipe Clean shows your games, apps and large folders one at a time, biggest first.
+  Swipe left to mark something for removal and right to keep it. Steam and Epic games show
+  their cover art and when you last played them. Nothing is removed until you review and
+  confirm: personal files go to the Recycle Bin and programs use their official uninstaller.
+Moniker: swipe-clean
+Tags:
+- cleaner
+- disk-cleanup
+- disk-space
+- epic-games
+- steam
+- storage
+- uninstaller
+ReleaseNotesUrl: https://github.com/xdropp/swipe-clean/releases/tag/v1.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

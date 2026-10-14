@@ -28,6 +28,9 @@ jobs:
   windows:
     runs-on: windows-latest
     timeout-minutes: 30
+    outputs:
+      publicar: ${{ steps.versao.outputs.publicar }}
+      tag: ${{ steps.versao.outputs.tag }}
     steps:
       - uses: actions/checkout@v5
 
@@ -119,3 +122,25 @@ jobs:
             dist/SwipeClean-Setup-*.exe
             dist/SwipeClean-Portable-*.exe
             dist/SHA256SUMS.txt
+
+  # Envia a versão nova para o winget (pull request automático no microsoft/winget-pkgs).
+  # Só roda depois que o pacote GabrielFroes.SwipeClean já existir no winget e com o
+  # segredo WINGET_TOKEN configurado (token clássico do GitHub com o escopo public_repo).
+  winget:
+    needs: windows
+    if: needs.windows.outputs.publicar == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar o token do winget
+        id: token
+        env:
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: |
+          if [ -n "$WINGET_TOKEN" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "::notice::WINGET_TOKEN não configurado: a versão não foi enviada ao winget"; fi
+      - uses: vedantmgoyal9/winget-releaser@v2
+        if: steps.token.outputs.ok == 'true'
+        with:
+          identifier: GabrielFroes.SwipeClean
+          release-tag: ${{ needs.windows.outputs.tag }}
+          installers-regex: 'SwipeClean-Setup-.*\.exe$'
+          token: ${{ secrets.WINGET_TOKEN }}

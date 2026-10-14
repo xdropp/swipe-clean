@@ -18,7 +18,8 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win nsis portable",
-    "dist:portable": "electron-builder --win portable"
+    "dist:portable": "electron-builder --win portable",
+    "dist:store": "electron-builder --win appx"
   },
   "devDependencies": {
     "electron": "^37.0.0",
@@ -81,6 +82,19 @@
     },
     "portable": {
       "artifactName": "SwipeClean-Portable-${version}.${ext}"
+    },
+    "appx": {
+      "applicationId": "SwipeClean",
+      "identityName": "DEFINIR_NO_GITHUB",
+      "publisher": "CN=DEFINIR_NO_GITHUB",
+      "publisherDisplayName": "Gabriel Froes",
+      "displayName": "Swipe Clean",
+      "backgroundColor": "transparent",
+      "languages": [
+        "en-US",
+        "pt-BR"
+      ],
+      "artifactName": "SwipeClean-Store-${version}.${ext}"
     }
   }
 }

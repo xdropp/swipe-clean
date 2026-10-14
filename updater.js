@@ -34,6 +34,7 @@ function isNewer(remote, local) {
 // Como o app está rodando: instalado (pode se atualizar sozinho), portátil ou código-fonte
 function installKind() {
   if (!app.isPackaged) return 'dev';
+  if (process.windowsStore) return 'store'; // a Microsoft Store atualiza sozinha
   if (process.env.PORTABLE_EXECUTABLE_FILE) return 'portable';
   return 'installed';
 }
@@ -48,6 +49,7 @@ async function fetchJSON(url) {
 }
 
 async function check() {
+  if (installKind() === 'store') return { current: app.getVersion(), version: app.getVersion(), available: false, kind: 'store', canInstall: false };
   const rel = await fetchJSON(`https://api.github.com/repos/${REPO}/releases/latest`);
   const version = String(rel.tag_name || '').replace(/^v/i, '');
   const setup = (rel.assets || []).find((a) => /^SwipeClean-Setup-.*\.exe$/i.test(a.name));

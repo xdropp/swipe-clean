@@ -1,0 +1,87 @@
+# Gera o pacote da Microsoft Store (.appx) para enviar no Partner Center.
+#
+# Uma vez só: no Partner Center, em Gerenciamento de produto → Identidade do produto,
+# copie os três valores para Settings → Secrets and variables → Actions → Variables:
+#   STORE_IDENTITY_NAME       Package/Identity/Name           (ex.: 12345GabrielFroes.SwipeClean)
+#   STORE_PUBLISHER           Package/Identity/Publisher      (ex.: CN=1A2B3C4D-....)
+#   STORE_PUBLISHER_NAME      Package/Properties/PublisherDisplayName
+#
+# A cada versão: Actions → Pacote da Microsoft Store → Run workflow. O arquivo sai em
+# "Artifacts" no fim da execução. A Store assina o pacote ao publicar.
+
+name: Pacote da Microsoft Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      teste:
+        description: 'Só testar a compilação com uma identidade fictícia (o pacote não serve para a Store)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  appx:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Conferir a identidade da Store
+        shell: pwsh
+        env:
+          NAME: ${{ inputs.teste && 'Teste.SwipeClean' || vars.STORE_IDENTITY_NAME }}
+          PUB: ${{ inputs.teste && 'CN=00000000-0000-0000-0000-000000000000' || vars.STORE_PUBLISHER }}
+          PUBNAME: ${{ inputs.teste && 'Teste' || vars.STORE_PUBLISHER_NAME }}
+        run: |
+          if (-not $env:NAME -or -not $env:PUB -or -not $env:PUBNAME) {
+            Write-Host "::error::Configure as variáveis STORE_IDENTITY_NAME, STORE_PUBLISHER e STORE_PUBLISHER_NAME (veja o topo deste arquivo)"
+            exit 1
+          }
+          if ($env:PUB -notmatch '^CN=') { Write-Host "::error::STORE_PUBLISHER deve começar com CN="; exit 1 }
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Configurar doação por Pix
+        shell: pwsh
+        env:
+          PIX_KEY: ${{ secrets.PIX_KEY }}
+          PIX_NOME: ${{ secrets.PIX_NOME }}
+          PIX_CIDADE: ${{ secrets.PIX_CIDADE }}
+        run: |
+          $cfg = Get-Content doacao.exemplo.json -Raw | ConvertFrom-Json
+          if ($env:PIX_KEY) {
+            $cfg.pixKey = $env:PIX_KEY
+            $cfg.nome = $env:PIX_NOME
+            $cfg.cidade = $env:PIX_CIDADE
+          }
+          $cfg | ConvertTo-Json | Set-Content doacao.json -Encoding utf8NoBOM
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Gerar pacote da Store
+        shell: pwsh
+        env:
+          NAME: ${{ inputs.teste && 'Teste.SwipeClean' || vars.STORE_IDENTITY_NAME }}
+          PUB: ${{ inputs.teste && 'CN=00000000-0000-0000-0000-000000000000' || vars.STORE_PUBLISHER }}
+          PUBNAME: ${{ inputs.teste && 'Teste' || vars.STORE_PUBLISHER_NAME }}
+        run: |
+          npx electron-builder --win appx --publish never `
+            "-c.appx.identityName=$env:NAME" `
+            "-c.appx.publisher=$env:PUB" `
+            "-c.appx.publisherDisplayName=$env:PUBNAME"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-ChildItem dist -Filter *.appx | ForEach-Object { Write-Host "::notice::Pacote gerado: $($_.Name) ($([math]::Round($_.Length / 1MB)) MB)" }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SwipeClean-Store
+          path: dist/*.appx
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.9.0.schema.json
+PackageIdentifier: GabrielFroes.SwipeClean
+PackageVersion: 1.5.0
+PackageLocale: pt-BR
+Publisher: Gabriel Froes
+PackageName: Swipe Clean
+License: MIT
+PrivacyUrl: https://github.com/xdropp/swipe-clean/blob/main/PRIVACIDADE.md
+ShortDescription: Libere espaço no disco deslizando cartas. Jogos, aplicativos e pastas grandes, um de cada vez.
+Description: |-
+  O Swipe Clean mostra seus jogos, aplicativos e pastas grandes um de cada vez, do maior para o menor.
+  Deslize para a esquerda para marcar para remover e para a direita para manter. Jogos da Steam e da
+  Epic aparecem com a capa e a data em que você jogou pela última vez. Nada é removido antes de você
+  revisar e confirmar: arquivos pessoais vão para a Lixeira e programas saem pelo desinstalador oficial.
+Tags:
+- desinstalador
+- espaço-em-disco
+- limpeza
+- steam
+ManifestType: locale
+ManifestVersion: 1.9.0
