@@ -103,7 +103,7 @@ jobs:
           $m = [regex]::Match($log, "(?ms)^## \[$([regex]::Escape($version))\][^\n]*\n(.*?)(?=^## \[|\z)")
           $notes = if ($m.Success) { $m.Groups[1].Value.Trim() } else { "Swipe Clean $version" }
           $sums = (Get-Content dist/SHA256SUMS.txt -Raw).Trim()
-          $notes += "`n`n---`n**Which one?** ``SwipeClean-Setup`` installs with Start menu shortcuts. ``SwipeClean-Portable`` runs directly, no installation. · **Qual baixar?** ``Setup`` instala com atalhos; ``Portable`` abre direto, sem instalar.`n`nIf Windows shows ""Windows protected your PC"", click **More info → Run anyway**. · Se aparecer ""O Windows protegeu o computador"", clique em **Mais informações → Executar assim mesmo**.`n`n<details><summary>SHA-256</summary>`n`n``````n$sums`n```````n</details>"
+          $notes += "`n`n---`n**Which one?** ``SwipeClean-Setup`` installs with Start menu shortcuts. ``SwipeClean-Portable`` runs directly, no installation. · **Qual baixar?** ``Setup`` instala com atalhos; ``Portable`` abre direto, sem instalar.`n`nIf Windows shows ""Windows protected your PC"", click **More info → Run anyway**. · Se aparecer ""O Windows protegeu o computador"", clique em **Mais informações → Executar assim mesmo**.`n`n<details><summary>SHA-256</summary>`n`n```````n$sums`n```````n</details>"
           Set-Content release-notes.md $notes -Encoding utf8NoBOM
 
       - name: Publicar no GitHub Releases
