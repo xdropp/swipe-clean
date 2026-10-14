@@ -2,6 +2,11 @@
 
 Todas as mudanças de cada versão do Swipe Clean.
 
+## [1.2.1] - 2026-10-14
+
+### Corrigido
+- O botão de apoio por Pix não aparecia na versão baixada do GitHub.
+
 ## [1.2.0] - 2026-10-13
 
 ### Novo

@@ -67,7 +67,8 @@ jobs:
             $cfg.pixKey = $env:PIX_KEY
             $cfg.nome = $env:PIX_NOME
             $cfg.cidade = $env:PIX_CIDADE
-            Write-Host "Doação por Pix ativada"
+            $fim = $env:PIX_KEY.Substring([Math]::Max(0, $env:PIX_KEY.Length - 4))
+            Write-Host "::notice::Doação por Pix ativada (chave terminando em $fim)"
           } else {
             Write-Host "::warning::Segredo PIX_KEY não configurado: a versão sai sem o botão de doação"
           }

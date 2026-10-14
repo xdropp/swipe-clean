@@ -1,7 +1,7 @@
 {
   "name": "swipe-clean",
   "productName": "Swipe Clean",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Libere espaço no PC deslizando cartas: esquerda remove, direita mantém. Jogos, aplicativos e pastas grandes.",
   "main": "main.js",
   "author": "Gabriel Froes",
