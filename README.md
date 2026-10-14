@@ -9,8 +9,8 @@ Jogos, aplicativos e pastas pesadas aparecem um de cada vez: deslize para a esqu
 
 [![Baixar para Windows](https://img.shields.io/badge/Baixar_para_Windows-7c8cff?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/xdropp/swipe-clean/releases/latest)
 
-[![Versão](https://img.shields.io/github/v/release/xdropp/swipe-clean?label=vers%C3%A3o&color=2fe39a)](https://github.com/xdropp/swipe-clean/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/xdropp/swipe-clean/total?label=downloads&color=7c8cff)](https://github.com/xdropp/swipe-clean/releases)
+[![Versão](https://img.shields.io/github/v/release/xdropp/swipe-clean?label=vers%C3%A3o&color=2fe39a&cacheSeconds=3600)](https://github.com/xdropp/swipe-clean/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/xdropp/swipe-clean/total?label=downloads&color=7c8cff&cacheSeconds=3600)](https://github.com/xdropp/swipe-clean/releases)
 ![Windows 10 e 11](https://img.shields.io/badge/Windows-10_e_11-0e1014)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-0e1014)](LICENSE.txt)
 
