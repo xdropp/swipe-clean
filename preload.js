@@ -1,0 +1,25 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('swipeApi', {
+  platform: process.platform,
+  autoScan: process.argv.includes('--swipe-auto-scan'),
+  log: (text) => ipcRenderer.send('log', text),
+  appInfo: () => ipcRenderer.invoke('app-info'),
+  diskInfo: () => ipcRenderer.invoke('disk-info'),
+  scan: () => ipcRenderer.invoke('scan'),
+  remove: (ids) => ipcRenderer.invoke('remove', ids),
+  skipCurrent: () => ipcRenderer.send('skip-current'),
+  openLocation: (id) => ipcRenderer.invoke('open-location', id),
+  openLogs: () => ipcRenderer.invoke('open-logs'),
+  relaunchAdmin: () => ipcRenderer.invoke('relaunch-admin'),
+  donateInfo: () => ipcRenderer.invoke('donate-info'),
+  copyText: (t) => ipcRenderer.invoke('copy-text', t),
+  donateOpened: (where) => ipcRenderer.send('donate-opened', where),
+  getSettings: () => ipcRenderer.invoke('settings-get'),
+  setSettings: (patch) => ipcRenderer.invoke('settings-set', patch),
+  getDecisions: () => ipcRenderer.invoke('decisions-get'),
+  saveDecisions: (d) => ipcRenderer.invoke('decisions-save', d),
+  clearDecisions: () => ipcRenderer.invoke('decisions-clear'),
+  onScanProgress: (cb) => ipcRenderer.on('scan-progress', (_e, d) => cb(d)),
+  onRemoveProgress: (cb) => ipcRenderer.on('remove-progress', (_e, d) => cb(d)),
+});

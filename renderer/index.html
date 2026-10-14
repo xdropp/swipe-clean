@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Swipe Clean</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><img class="logo" src="assets/icon.png" alt="" /> Swipe Clean</div>
+    <div class="disk" id="disk" title="Espaço no disco do sistema. A parte listrada é o que você marcou para remover.">
+      <div class="disk-text"><span id="diskLabel">Disco</span><span id="diskFree">—</span></div>
+      <div class="disk-bar"><div class="disk-used" id="diskUsed"></div><div class="disk-pending" id="diskPending"></div></div>
+    </div>
+    <button class="pill" id="queuePill" hidden></button>
+    <button class="icon-btn" id="settingsBtn" title="Configurações" aria-label="Configurações">⚙</button>
+  </header>
+
+  <div class="demo-banner" id="demoBanner" hidden>Modo demonstração: dados fictícios, nada é removido. No Windows o app lê o seu PC de verdade.</div>
+
+  <main>
+    <!-- início -->
+    <section class="screen" id="screen-home">
+      <div class="hero">
+        <div class="hero-cards" aria-hidden="true">
+          <div class="hc hc1">✕</div><div class="hc hc2">🎮</div><div class="hc hc3">♥</div>
+        </div>
+        <h1>Arraste para liberar espaço</h1>
+        <p class="lead">Jogos, aplicativos e pastas pesadas viram cartas. <b class="red">Esquerda</b> marca para remover, <b class="green">direita</b> mantém. Nada é apagado até você revisar e confirmar no final.</p>
+        <button class="primary big" id="startBtn">Analisar meu PC</button>
+        <div class="admin-note" id="adminNote" hidden>
+          <span>🔒 Para mostrar quando cada aplicativo foi usado, o Windows exige permissão de administrador.</span>
+          <button class="ghost small" id="adminBtnHome">Reiniciar como administrador</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- analisando -->
+    <section class="screen" id="screen-scan" hidden>
+      <div class="scan">
+        <div class="scan-head">
+          <div class="radar" aria-hidden="true"><span></span><span></span><span></span><div class="radar-core">🔍</div></div>
+          <div>
+            <h2>Analisando seu PC</h2>
+            <p class="muted"><span id="scanElapsed">0:00</span> · medir pastas grandes pode levar alguns minutos</p>
+          </div>
+        </div>
+        <div class="bar"><div class="bar-fill" id="scanBar"></div></div>
+        <ul class="steps" id="steps"></ul>
+        <p class="scan-detail" id="scanDetail">&nbsp;</p>
+      </div>
+    </section>
+
+    <!-- resumo por categoria -->
+    <section class="screen" id="screen-summary" hidden>
+      <div class="summary">
+        <div class="summary-head">
+          <div>
+            <h2 id="summaryTitle">Encontrei</h2>
+            <p class="muted" id="summarySub"></p>
+          </div>
+          <button class="ghost" id="rescanBtn">Analisar de novo</button>
+        </div>
+        <div class="tiles" id="tiles"></div>
+      </div>
+    </section>
+
+    <!-- cartas -->
+    <section class="screen" id="screen-deck" hidden>
+      <div class="deck-head">
+        <button class="ghost small" id="toSummary">← Resumo</button>
+        <div class="tabs" id="tabs"></div>
+        <div class="counter" id="counter"></div>
+      </div>
+
+      <div class="stack-wrap">
+        <div class="stack" id="stack"></div>
+        <div class="deck-empty" id="deckEmpty" hidden>
+          <div class="empty-icon">✓</div>
+          <h2 id="emptyTitle">Categoria concluída</h2>
+          <p id="emptyText"></p>
+          <div class="row" id="emptyActions"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="round no" id="noBtn" title="Remover (←)">✕</button>
+        <button class="round undo" id="undoBtn" title="Desfazer (Ctrl+Z)">↶</button>
+        <button class="round yes" id="yesBtn" title="Manter (→)">♥</button>
+      </div>
+      <p class="keys">← remover · → manter · Ctrl+Z desfazer · 1 2 3 trocam de categoria</p>
+    </section>
+
+    <!-- revisão -->
+    <section class="screen" id="screen-review" hidden>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Revisar antes de remover</h2>
+            <p class="muted">Desmarque o que quiser salvar. Programas e jogos abrem o desinstalador oficial, um de cada vez.</p>
+          </div>
+          <button class="ghost" id="backToDeck">Voltar às cartas</button>
+        </div>
+        <div class="list" id="reviewList"></div>
+        <div class="panel-foot">
+          <div class="total" id="reviewTotal"></div>
+          <button class="danger" id="confirmBtn">Remover</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- removendo / resultado -->
+    <section class="screen" id="screen-remove" hidden>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 id="removeTitle">Removendo…</h2>
+            <p class="muted" id="removeSub">Não feche o app enquanto isso acontece.</p>
+          </div>
+          <button class="ghost" id="skipBtn" hidden>Pular este</button>
+        </div>
+        <div class="list" id="removeList"></div>
+        <div class="donate-strip" id="donateStrip" hidden>
+          <div class="donate-heart">♥</div>
+          <div class="donate-text"><b id="donateStripTitle">Gostou do resultado?</b><span>O Swipe Clean é gratuito e feito por uma pessoa só. Se ele te ajudou, um Pix de qualquer valor ajuda a manter o projeto.</span></div>
+          <button class="primary small" id="donateStripBtn">Apoiar com Pix</button>
+        </div>
+        <div class="panel-foot" id="removeFoot" hidden>
+          <div class="total" id="removeTotal"></div>
+          <div class="row">
+            <button class="ghost" id="backSummaryBtn">Continuar escolhendo</button>
+            <button class="primary" id="againBtn">Analisar de novo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- modal de confirmação -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-box">
+      <h3 id="modalTitle">Confirmar remoção</h3>
+      <p id="modalText"></p>
+      <div class="row end">
+        <button class="ghost" id="modalCancel">Cancelar</button>
+        <button class="danger" id="modalOk">Sim, remover</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- configurações -->
+  <div class="modal" id="settings" hidden>
+    <div class="modal-box wide">
+      <div class="settings-head">
+        <h3>Configurações</h3>
+        <button class="icon-btn" id="settingsClose" aria-label="Fechar">✕</button>
+      </div>
+
+      <label class="setting">
+        <div>
+          <b>Buscar capas de jogos na internet</b>
+          <span>Quando a capa não está no seu PC, o nome do jogo é pesquisado na loja da Steam (ou da Epic). Nenhum outro dado sai do seu computador. Vale a partir da próxima análise.</span>
+        </div>
+        <input type="checkbox" class="switch" id="optCovers" />
+      </label>
+
+      <label class="setting">
+        <div>
+          <b>Mostrar de novo o que eu já mantive</b>
+          <span>Por padrão, o que você deslizou para a direita não aparece nas próximas análises.</span>
+        </div>
+        <input type="checkbox" class="switch" id="optShowKept" />
+      </label>
+
+      <div class="setting">
+        <div>
+          <b>Itens mantidos</b>
+          <span id="keptInfo">Nenhum item mantido ainda.</span>
+        </div>
+        <button class="ghost small" id="clearKeptBtn">Esquecer</button>
+      </div>
+
+      <div class="setting">
+        <div>
+          <b>Permissão de administrador</b>
+          <span id="adminInfo">—</span>
+        </div>
+        <button class="ghost small" id="adminBtn">Reiniciar como admin</button>
+      </div>
+
+      <div class="setting">
+        <div>
+          <b>Dados e diagnóstico</b>
+          <span>Configurações, capas salvas e o log da última execução.</span>
+        </div>
+        <button class="ghost small" id="openLogsBtn">Abrir pasta</button>
+      </div>
+
+      <div class="setting" id="donateSetting" hidden>
+        <div>
+          <b>Apoiar o projeto ♥</b>
+          <span>O app é gratuito. Se ele te ajudou, dá para apoiar com um Pix de qualquer valor.</span>
+        </div>
+        <button class="primary small" id="donateSettingBtn">Apoiar com Pix</button>
+      </div>
+
+      <p class="about" id="about">Swipe Clean</p>
+    </div>
+  </div>
+
+  <!-- doação por Pix -->
+  <div class="modal" id="donate" hidden>
+    <div class="modal-box donate-box">
+      <div class="settings-head">
+        <h3>Apoie o Swipe Clean ♥</h3>
+        <button class="icon-btn" id="donateClose" aria-label="Fechar">✕</button>
+      </div>
+      <p class="muted donate-lead">Abra o app do seu banco, escolha <b>Pix → Ler QR Code</b> ou <b>Pix Copia e Cola</b>. Qualquer valor ajuda.</p>
+      <div class="amounts" id="amounts"></div>
+      <div class="donate-main">
+        <div class="qr-wrap"><img id="donateQr" alt="QR Code Pix" /></div>
+        <div class="donate-side">
+          <div class="donate-label">Para</div>
+          <div class="donate-name" id="donateName">—</div>
+          <div class="donate-label">Chave Pix</div>
+          <div class="donate-key" id="donateKey">—</div>
+          <button class="ghost small" id="copyKeyBtn">Copiar chave</button>
+          <button class="primary" id="copyCodeBtn">Copiar Pix Copia e Cola</button>
+          <span class="copied" id="copied" hidden>Copiado ✓</span>
+        </div>
+      </div>
+      <p class="donate-foot">O pagamento acontece direto no app do seu banco. O Swipe Clean não vê nem guarda nenhum dado de pagamento.</p>
+    </div>
+  </div>
+
+  <script src="demo-data.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

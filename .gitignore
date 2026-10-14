@@ -1,0 +1,14 @@
+# configuração privada de doação (cada distribuidor usa a sua; veja doacao.exemplo.json)
+doacao.json
+
+# dependências e builds (são recriados com npm install / build.bat)
+node_modules/
+dist/
+
+# arquivos do sistema e de editores
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+*.log

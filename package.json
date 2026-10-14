@@ -1,0 +1,62 @@
+{
+  "name": "swipe-clean",
+  "productName": "Swipe Clean",
+  "version": "1.2.0",
+  "description": "Libere espaço no PC deslizando cartas: esquerda remove, direita mantém. Jogos, aplicativos e pastas grandes.",
+  "main": "main.js",
+  "author": "Gabriel Froes",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis portable",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^37.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.gabrielfroes.swipeclean",
+    "productName": "Swipe Clean",
+    "copyright": "© 2026 Gabriel Froes",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "scanner.js",
+      "games.js",
+      "pix.js",
+      "doacao.json",
+      "vendor/**",
+      "scripts/**",
+      "renderer/**",
+      "package.json"
+    ],
+    "asarUnpack": ["scripts/**", "scanner.js", "games.js"],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": ["nsis", "portable"],
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Swipe Clean",
+      "installerLanguages": ["pt_BR"],
+      "language": "1046",
+      "license": "LICENSE.txt",
+      "artifactName": "SwipeClean-Setup-${version}.${ext}",
+      "uninstallDisplayName": "Swipe Clean"
+    },
+    "portable": {
+      "artifactName": "SwipeClean-Portatil-${version}.${ext}"
+    }
+  }
+}
