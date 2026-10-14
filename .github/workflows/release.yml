@@ -28,7 +28,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Verificar se esta versão já foi publicada
         id: versao
@@ -48,7 +48,7 @@ jobs:
           }
           exit 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         if: steps.versao.outputs.publicar == 'true'
         with:
           node-version: 22
