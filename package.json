@@ -6,6 +6,14 @@
   "main": "main.js",
   "author": "Gabriel Froes",
   "license": "MIT",
+  "homepage": "https://github.com/xdropp/swipe-clean#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xdropp/swipe-clean.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xdropp/swipe-clean/issues"
+  },
   "private": true,
   "scripts": {
     "start": "electron .",
@@ -36,10 +44,17 @@
       "renderer/**",
       "package.json"
     ],
-    "asarUnpack": ["scripts/**", "scanner.js", "games.js"],
+    "asarUnpack": [
+      "scripts/**",
+      "scanner.js",
+      "games.js"
+    ],
     "win": {
       "icon": "build/icon.ico",
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "requestedExecutionLevel": "asInvoker"
     },
     "nsis": {
@@ -49,7 +64,9 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Swipe Clean",
-      "installerLanguages": ["pt_BR"],
+      "installerLanguages": [
+        "pt_BR"
+      ],
       "language": "1046",
       "license": "LICENSE.txt",
       "artifactName": "SwipeClean-Setup-${version}.${ext}",

@@ -1,0 +1,41 @@
+name: Relatar um problema
+description: Algo não funcionou como deveria
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Obrigado por ajudar a melhorar o Swipe Clean! Quanto mais detalhes, mais rápido dá para corrigir.
+  - type: textarea
+    id: oque
+    attributes:
+      label: O que aconteceu?
+      description: E o que você esperava que acontecesse.
+    validations:
+      required: true
+  - type: textarea
+    id: passos
+    attributes:
+      label: Como reproduzir
+      placeholder: |
+        1. Abri o app
+        2. Cliquei em Analisar meu PC
+        3. ...
+  - type: input
+    id: versao
+    attributes:
+      label: Versão do Swipe Clean
+      description: Aparece em ⚙ Configurações, no rodapé.
+      placeholder: "1.2.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Versão do Windows
+      placeholder: Windows 11 23H2
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Em ⚙ Configurações → Abrir pasta, abra o log.txt e cole o conteúdo aqui (ou arraste o arquivo). Ele não contém senhas, só nomes de programas e pastas.
+      render: text

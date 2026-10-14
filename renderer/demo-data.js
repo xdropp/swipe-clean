@@ -29,16 +29,16 @@
     { id: 'g:epic:4', kind: 'game', platform: 'epic', name: 'Fortaleza Arena', size: 66 * GB, lastUsed: now - 95 * DAY, installed: now - 400 * DAY, location: 'C:\\Program Files\\Epic Games\\Fortaleza' },
     { id: 'p:9', kind: 'program', isGame: true, name: 'Lendas do Abismo', publisher: 'Estúdio Fictício', version: '2.3', installDate: '20240310', size: 24 * GB, lastUsed: now - 160 * DAY, location: 'C:\\Games\\Abismo' },
     { id: 'p:2', kind: 'program', name: 'Editor de Vídeo Pro 2024', publisher: 'Softwares Exemplo', version: '24.1', installDate: '20240203', location: 'C:\\Program Files\\EditorPro', size: 9.6 * GB, lastUsed: now - 95 * DAY },
-    { id: 'f:1', kind: 'download', name: 'Windows11_23H2_PTBR.iso', size: 6.2 * GB, modified: now - 300 * DAY, isDir: false, detail: 'Em Downloads', path: 'C:\\Users\\Gabriel\\Downloads\\Windows11_23H2_PTBR.iso' },
+    { id: 'f:1', kind: 'download', name: 'Windows11_23H2_PTBR.iso', size: 6.2 * GB, modified: now - 300 * DAY, isDir: false, detail: 'Em Downloads', path: 'C:\\Users\\Voce\\Downloads\\Windows11_23H2_PTBR.iso' },
     { id: 'p:3', kind: 'program', name: 'Android Studio', publisher: 'Google LLC', version: '2024.1', installDate: '20240520', location: 'C:\\Program Files\\Android', size: 3.1 * GB, lastUsed: now - 40 * DAY },
-    { id: 'f:2', kind: 'cache', name: 'Cache do npm', size: 4.4 * GB, detail: 'Pacotes baixados pelo npm. Eles são baixados de novo quando um projeto precisar.', path: 'C:\\Users\\Gabriel\\AppData\\Local\\npm-cache' },
+    { id: 'f:2', kind: 'cache', name: 'Cache do npm', size: 4.4 * GB, detail: 'Pacotes baixados pelo npm. Eles são baixados de novo quando um projeto precisar.', path: 'C:\\Users\\Voce\\AppData\\Local\\npm-cache' },
     { id: 'p:4', kind: 'program', name: 'Microsoft Visual C++ 2015-2022 Redistributable (x64)', publisher: 'Microsoft Corporation', version: '14.38', installDate: '20230901', size: 24 * MB, lastUsed: null, risky: true },
-    { id: 'f:3', kind: 'temp', name: 'Arquivos temporários', size: 2.3 * GB, detail: 'Sobras de instaladores e programas. Arquivos em uso agora são mantidos automaticamente.', path: 'C:\\Users\\Gabriel\\AppData\\Local\\Temp' },
+    { id: 'f:3', kind: 'temp', name: 'Arquivos temporários', size: 2.3 * GB, detail: 'Sobras de instaladores e programas. Arquivos em uso agora são mantidos automaticamente.', path: 'C:\\Users\\Voce\\AppData\\Local\\Temp' },
     { id: 's:1', kind: 'store', name: 'Paciência Clássica', publisher: 'Estúdio Exemplo', version: '4.19', installDate: '20230115', size: 380 * MB, lastUsed: null },
-    { id: 'p:5', kind: 'program', name: 'Chat Desktop', publisher: 'Exemplo Inc.', version: '1.0.9165', installDate: '20250412', location: 'C:\\Users\\Gabriel\\AppData\\Local\\Chat', size: 410 * MB, lastUsed: now - 1 * DAY },
-    { id: 'f:4', kind: 'appdata', name: 'Unity', size: 1.8 * GB, detail: 'Em Roaming\\Unity', matchedProgram: null, path: 'C:\\Users\\Gabriel\\AppData\\Roaming\\Unity' },
+    { id: 'p:5', kind: 'program', name: 'Chat Desktop', publisher: 'Exemplo Inc.', version: '1.0.9165', installDate: '20250412', location: 'C:\\Users\\Voce\\AppData\\Local\\Chat', size: 410 * MB, lastUsed: now - 1 * DAY },
+    { id: 'f:4', kind: 'appdata', name: 'Unity', size: 1.8 * GB, detail: 'Em Roaming\\Unity', matchedProgram: null, path: 'C:\\Users\\Voce\\AppData\\Roaming\\Unity' },
     { id: 'p:6', kind: 'program', name: 'Compactador 6.24 (64-bit)', publisher: 'Exemplo GmbH', version: '6.24', installDate: '20221002', location: 'C:\\Program Files\\Compactador', size: 9 * MB, lastUsed: now - 500 * DAY },
-    { id: 'f:5', kind: 'user', name: 'Gravações de gameplay', size: 22 * GB, modified: now - 120 * DAY, isDir: true, detail: 'Em Videos', path: 'C:\\Users\\Gabriel\\Videos\\Gravações' },
+    { id: 'f:5', kind: 'user', name: 'Gravações de gameplay', size: 22 * GB, modified: now - 120 * DAY, isDir: true, detail: 'Em Videos', path: 'C:\\Users\\Voce\\Videos\\Gravações' },
   ];
 })();
 

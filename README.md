@@ -1,98 +1,90 @@
+<div align="center">
+
+<img src="docs/img/icone.png" width="96" alt="Ícone do Swipe Clean" />
+
 # Swipe Clean
 
-Libere espaço no PC do jeito Tinder: **jogos, aplicativos e pastas pesadas** viram cartas.
-Deslize para a **esquerda** para marcar para remover e para a **direita** para manter.
-Nada é apagado até você revisar a lista e confirmar.
+**Libere espaço no seu PC deslizando cartas.**
+Jogos, aplicativos e pastas pesadas aparecem um de cada vez: deslize para a esquerda para remover, para a direita para manter.
 
-![ícone](build/icon.png)
+[![Baixar para Windows](https://img.shields.io/badge/Baixar_para_Windows-7c8cff?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/xdropp/swipe-clean/releases/latest)
 
-## O que ele encontra
+[![Versão](https://img.shields.io/github/v/release/xdropp/swipe-clean?label=vers%C3%A3o&color=2fe39a)](https://github.com/xdropp/swipe-clean/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/xdropp/swipe-clean/total?label=downloads&color=7c8cff)](https://github.com/xdropp/swipe-clean/releases)
+![Windows 10 e 11](https://img.shields.io/badge/Windows-10_e_11-0e1014)
+[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-0e1014)](LICENSE.txt)
 
-| Categoria | De onde vem | O que acontece se remover |
-|---|---|---|
-| 🎮 **Jogos da Steam** | Bibliotecas da Steam (todas as unidades) | Abre a desinstalação na própria Steam |
-| 🎮 **Jogos da Epic** | Manifestos da Epic Games | Abre a Epic para você desinstalar |
-| 🎮 **Outros jogos** | Programas instalados de editoras de jogos ou em pastas de jogos | Desinstalador oficial |
-| 🧩 **Aplicativos** | Registro do Windows e Microsoft Store | Desinstalador oficial / `Remove-AppxPackage` |
-| 📁 **Temporários e caches** | `%TEMP%`, npm, pip, Gradle, NuGet, Chrome, Edge, Discord, Spotify, VS Code, Cursor, shaders… | Apaga o conteúdo (é recriado) |
-| 📁 **Downloads e pastas pessoais** | Itens grandes em Downloads, Área de Trabalho, Vídeos, Documentos | Vai para a **Lixeira** |
-| 📁 **Dados de aplicativos** | Pastas grandes em AppData | Vai para a **Lixeira** |
+<img src="docs/img/jogo.png" width="760" alt="Carta de um jogo sendo deslizada para a esquerda" />
 
-**Capas dos jogos:** primeiro do cache da Steam no seu PC; se não houver, da loja da Steam ou da Epic (dá para desligar em ⚙ Configurações).
+</div>
 
-**Último uso:** jogos da Steam mostram quando foram jogados pela última vez. Para os demais, o Windows exige permissão de administrador (botão *Reiniciar como administrador* no app).
+## Por que usar
 
-## Proteções
+Ferramentas de limpeza costumam mostrar uma lista enorme e assustadora. O Swipe Clean faz o contrário: mostra **um item por vez, do maior para o menor**, com tudo o que você precisa para decidir. Tamanho, quando você usou pela última vez e o que acontece se remover.
 
-- Deslizar só marca: tudo passa por uma revisão com caixas de seleção e uma confirmação.
-- Atualizações do Windows, componentes de sistema e runtimes de jogos da Steam nem aparecem.
-- Drivers, runtimes (Visual C++, .NET, DirectX, WebView2) aparecem com aviso amarelo.
-- Arquivos pessoais vão para a Lixeira, não são apagados de vez.
-- Programas e jogos são removidos pelo desinstalador oficial deles; o app só confirma que sumiram.
-- O que você mantém não aparece de novo nas próximas análises.
+- 🎮 **Jogos** da Steam, da Epic Games e de outras lojas, com capa e data do último jogo.
+- 🧩 **Aplicativos** instalados e apps da Microsoft Store.
+- 📁 **Pastas grandes:** downloads esquecidos, caches, arquivos temporários e dados de programas que você já desinstalou.
 
-Veja também a [política de privacidade](PRIVACIDADE.md).
+<img src="docs/img/resumo.png" width="760" alt="Resumo com as categorias Jogos, Aplicativos e Pastas grandes" />
 
-## Rodar em modo de desenvolvimento
+## Seguro por padrão
 
-1. Instale o [Node.js LTS](https://nodejs.org).
-2. Dê dois cliques em `iniciar.bat` (ou `npm install` e `npm start`).
-3. `diagnostico.bat` abre o app e já inicia a análise, registrando tudo no log.
+- **Deslizar só marca.** Nada é apagado antes de você revisar a lista e confirmar.
+- **Arquivos pessoais vão para a Lixeira**, então dá para recuperar.
+- **Programas e jogos saem pelo desinstalador oficial** deles, ou pela própria Steam ou Epic.
+- **Componentes do Windows nem aparecem.** Drivers e bibliotecas importantes vêm com aviso.
+- **Nada sai do seu PC.** Sem conta, sem anúncios, sem telemetria. Veja a [política de privacidade](PRIVACIDADE.md).
 
-Fora do Windows (ou abrindo `renderer/index.html` num navegador) o app entra em **modo demonstração**, com dados fictícios.
+<img src="docs/img/revisao.png" width="760" alt="Revisão das remoções antes de confirmar" />
 
-## Gerar o instalador
+## Como instalar
 
-Dê dois cliques em **`build.bat`**. Em alguns minutos a pasta `dist\` terá:
+1. Vá em [**Releases**](https://github.com/xdropp/swipe-clean/releases/latest) e baixe um dos arquivos:
+   - **`SwipeClean-Setup-x.y.z.exe`** instala com atalhos no menu Iniciar (recomendado).
+   - **`SwipeClean-Portatil-x.y.z.exe`** abre direto, sem instalar.
+2. Abra o arquivo baixado. Não precisa instalar mais nada.
 
-- `SwipeClean-Setup-1.2.0.exe`: instalador com atalhos no menu Iniciar e na Área de Trabalho.
-- `SwipeClean-Portatil-1.2.0.exe`: versão que roda sem instalar.
+> **"O Windows protegeu o computador"?** Esse aviso aparece para programas novos que ainda não têm assinatura digital. Clique em **Mais informações → Executar assim mesmo**. O código do Swipe Clean é aberto e você pode conferir tudo o que ele faz aqui no repositório.
 
-> O executável não é assinado digitalmente, então o Windows SmartScreen mostra "O Windows protegeu o computador" na primeira vez. Clique em **Mais informações → Executar assim mesmo**. Para publicar sem esse aviso, é preciso um certificado de assinatura de código.
+## Perguntas frequentes
 
-## Doação por Pix
+<details>
+<summary><b>Ele apaga coisas sozinho?</b></summary>
 
-O app mostra um convite discreto para apoiar com Pix **depois de uma limpeza bem-sucedida** e em ⚙ Configurações.
-O QR Code e o "Pix Copia e Cola" são gerados no próprio app, sem internet, seguindo o padrão BR Code do Banco Central.
+Não. Deslizar para a esquerda só coloca o item numa fila. No final você vê a lista completa, pode desmarcar o que quiser e precisa confirmar. Mesmo depois disso, arquivos pessoais vão para a Lixeira.
+</details>
 
-Para ativar, preencha `doacao.json` e gere o instalador de novo:
+<details>
+<summary><b>Por que alguns aplicativos mostram "Abra como admin" no último uso?</b></summary>
 
-```json
-{
-  "pixKey": "sua-chave-aleatoria",
-  "nome": "Seu Nome",
-  "cidade": "Sua Cidade",
-  "mensagem": "Swipe Clean",
-  "valores": [5, 10, 20]
-}
-```
+O Windows só deixa ver quando cada programa foi aberto com permissão de administrador. Use **⚙ Configurações → Reiniciar como administrador**. Jogos da Steam mostram a data do último jogo mesmo sem isso.
+</details>
 
-- Com `pixKey` vazio, a doação não aparece.
-- Prefira uma **chave aleatória**: a chave fica visível para quem usa o app (CPF, telefone ou e-mail ficariam expostos).
-- `nome` e `cidade` aparecem no app do banco de quem doa (sem acentos, até 25 e 15 caracteres).
-- `valores` são os botões de valor sugerido; sempre existe também a opção "Outro valor".
+<details>
+<summary><b>De onde vêm as capas dos jogos?</b></summary>
 
-## Atalhos
+Primeiro das imagens que a Steam já guarda no seu PC. Quando não há, o nome do jogo é pesquisado na loja da Steam ou da Epic. Dá para desligar isso em **⚙ Configurações**.
+</details>
 
-`←` remover · `→` manter · `Ctrl+Z` desfazer · `1` `2` `3` trocam de categoria · `Esc` fecha janelas
+<details>
+<summary><b>Removi algo por engano. E agora?</b></summary>
 
-## Diagnóstico
+Arquivos e pastas estão na **Lixeira**: é só restaurar de lá. Programas e jogos podem ser instalados de novo pela loja ou pelo site de origem; seus jogos continuam na sua biblioteca da Steam ou da Epic.
+</details>
 
-O log da última execução fica em `%APPDATA%\Swipe Clean\log.txt` (⚙ Configurações → *Abrir pasta*).
+<details>
+<summary><b>Funciona em Mac ou Linux?</b></summary>
 
-## Estrutura
+Por enquanto, só Windows 10 e 11.
+</details>
 
-```
-main.js        processo principal: janela, capas, configurações, remoções
-scanner.js     análise pesada numa thread separada (a janela não trava)
-games.js       detecção de jogos da Steam, Epic e outros
-pix.js         QR Code e Pix Copia e Cola da doação (vendor/qrcode: gerador de QR, MIT)
-preload.js     ponte segura entre a tela e o processo principal
-scripts/*.ps1  leitura do registro e dos apps da Store
-renderer/      interface (resumo, cartas, revisão, progresso, configurações)
-build/         ícone do app e recursos do instalador
-```
+## Problemas e sugestões
+
+Encontrou um erro ou tem uma ideia? [Abra uma issue](https://github.com/xdropp/swipe-clean/issues/new/choose). Para erros, anexe o `log.txt` (**⚙ Configurações → Abrir pasta**). Ele ajuda muito a descobrir o que aconteceu.
+
+As novidades de cada versão estão no [CHANGELOG](CHANGELOG.md). Para rodar o código ou contribuir, veja o [guia de desenvolvimento](docs/DESENVOLVIMENTO.md).
 
 ## Licença
 
-MIT. Veja [LICENSE.txt](LICENSE.txt).
+[MIT](LICENSE.txt) © 2026 Gabriel Froes

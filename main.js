@@ -662,7 +662,7 @@ ipcMain.handle('remove', async (_e, ids) => {
 
 function readDonation() {
   try {
-    const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'doacao.json'), 'utf8'));
+    const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'doacao.json'), 'utf8').replace(/^\uFEFF/, ''));
     if (!cfg.pixKey || !String(cfg.pixKey).trim()) return { enabled: false };
     const base = { key: cfg.pixKey, name: cfg.nome, city: cfg.cidade, message: cfg.mensagem };
     const amounts = (Array.isArray(cfg.valores) ? cfg.valores : []).filter((v) => Number(v) > 0).slice(0, 4);

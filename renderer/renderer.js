@@ -556,9 +556,9 @@ async function demoScan() {
     ['programs', '86 encontrados', ['C:\\Program Files\\Adobe']],
     ['store', '14 encontrados', ['C:\\Program Files\\WindowsApps']],
     ['games', '3 Steam · 1 Epic · 1 outros', ['C:\\Program Files (x86)\\Steam\\steamapps']],
-    ['caches', '3 com espaço para liberar', ['C:\\Users\\Gabriel\\AppData\\Local\\npm-cache\\_cacache']],
-    ['personal', '2 itens grandes', ['C:\\Users\\Gabriel\\Downloads']],
-    ['appdata', '1 pasta grande', ['C:\\Users\\Gabriel\\AppData\\Roaming\\Unity']],
+    ['caches', '3 com espaço para liberar', ['C:\\Users\\Voce\\AppData\\Local\\npm-cache\\_cacache']],
+    ['personal', '2 itens grandes', ['C:\\Users\\Voce\\Downloads']],
+    ['appdata', '1 pasta grande', ['C:\\Users\\Voce\\AppData\\Roaming\\Unity']],
     ['covers', '4 de 5 com capa', []],
     ['icons', '84 carregados', []],
   ];

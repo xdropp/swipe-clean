@@ -1,0 +1,14 @@
+name: Sugerir uma ideia
+description: Algo que deixaria o Swipe Clean melhor
+labels: [ideia]
+body:
+  - type: textarea
+    id: ideia
+    attributes:
+      label: Qual é a ideia?
+    validations:
+      required: true
+  - type: textarea
+    id: porque
+    attributes:
+      label: Que problema ela resolve para você?
