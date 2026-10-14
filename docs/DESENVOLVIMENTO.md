@@ -48,14 +48,11 @@ As versões são compiladas e publicadas automaticamente pelo GitHub Actions (`.
 
 1. Atualize `"version"` no `package.json` (ex.: `1.3.0`).
 2. Adicione uma seção `## [1.3.0] - AAAA-MM-DD` no `CHANGELOG.md`. Ela vira o texto da página da versão.
-3. Faça commit e crie a tag com o mesmo número:
-   ```bash
-   git tag v1.3.0
-   git push origin main v1.3.0
-   ```
-4. Em alguns minutos a versão aparece em **Releases** com os dois `.exe`.
+3. Faça commit e envie para a branch `main`.
 
-Para testar o build sem publicar, rode o workflow manualmente em **Actions → Publicar versão → Run workflow**. Os `.exe` ficam disponíveis como artefato por 7 dias.
+Se ainda não existir um Release com essa versão, o GitHub compila no Windows, cria a tag `v1.3.0` e publica os dois `.exe` em **Releases** em alguns minutos. Envios que não mudam a versão não publicam nada, então dá para enviar correções de documentação à vontade.
+
+Para tentar de novo uma publicação que falhou, use **Actions → Publicar versão → Run workflow**.
 
 ## Doação por Pix
 

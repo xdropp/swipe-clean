@@ -1,8 +1,9 @@
 # Publica uma nova versão do Swipe Clean.
 #
-# Como usar: atualize "version" no package.json e o CHANGELOG.md, faça commit e crie a tag:
-#   git tag v1.2.0 && git push origin v1.2.0
-# O GitHub compila no Windows e publica o instalador e a versão portátil em "Releases".
+# Como usar: aumente "version" no package.json, adicione a seção da versão no CHANGELOG.md
+# e envie para a branch main. Se ainda não existir um Release com essa versão, o GitHub
+# compila no Windows, cria a tag vX.Y.Z e publica o instalador e a versão portátil.
+# Envios que não mudam a versão não publicam nada.
 #
 # Doação por Pix: configure os segredos PIX_KEY, PIX_NOME e PIX_CIDADE em
 # Settings → Secrets and variables → Actions. Eles entram só no instalador, nunca no código.
@@ -12,8 +13,12 @@ name: Publicar versão
 
 on:
   push:
-    tags: ['v*']
-  workflow_dispatch: # rodar manualmente gera um build de teste, sem publicar
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: publicar-versao
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -25,21 +30,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verificar se esta versão já foi publicada
+        id: versao
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          "tag=v$version" >> $env:GITHUB_OUTPUT
+          gh release view "v$version" --repo "${{ github.repository }}" *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "A versão v$version já está publicada. Nada a fazer."
+            "publicar=false" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "Publicando a versão v$version"
+            "publicar=true" >> $env:GITHUB_OUTPUT
+          }
+          exit 0
+
       - uses: actions/setup-node@v4
+        if: steps.versao.outputs.publicar == 'true'
         with:
           node-version: 22
           cache: npm
 
-      - name: Conferir se a tag bate com o package.json
-        if: startsWith(github.ref, 'refs/tags/')
-        shell: pwsh
-        run: |
-          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          if ("v$version" -ne "${{ github.ref_name }}") {
-            throw "A tag ${{ github.ref_name }} não bate com a versão $version do package.json"
-          }
-
       - name: Configurar doação por Pix
+        if: steps.versao.outputs.publicar == 'true'
         shell: pwsh
         env:
           PIX_KEY: ${{ secrets.PIX_KEY }}
@@ -58,12 +74,15 @@ jobs:
           $cfg | ConvertTo-Json | Set-Content doacao.json -Encoding utf8NoBOM
 
       - name: Instalar dependências
+        if: steps.versao.outputs.publicar == 'true'
         run: npm ci
 
       - name: Gerar instalador e versão portátil
+        if: steps.versao.outputs.publicar == 'true'
         run: npx electron-builder --win nsis portable --publish never
 
       - name: Notas da versão a partir do CHANGELOG
+        if: steps.versao.outputs.publicar == 'true'
         shell: pwsh
         run: |
           $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
@@ -74,19 +93,14 @@ jobs:
           Set-Content release-notes.md $notes -Encoding utf8NoBOM
 
       - name: Publicar no GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/')
+        if: steps.versao.outputs.publicar == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          name: Swipe Clean ${{ github.ref_name }}
+          tag_name: ${{ steps.versao.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: Swipe Clean ${{ steps.versao.outputs.tag }}
+          make_latest: true
           body_path: release-notes.md
           files: |
             dist/SwipeClean-Setup-*.exe
             dist/SwipeClean-Portatil-*.exe
-
-      - name: Guardar build de teste
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: swipe-clean-teste
-          path: dist/*.exe
-          retention-days: 7
